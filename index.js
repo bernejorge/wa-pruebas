@@ -19,7 +19,7 @@ app.use('/uploads', express.static('uploads'));
 
 app.get('/', async (req, res) => {
   res.json({
-     message: "Bienvenido whatapp testing api v1.02 ..."
+     message: "Bienvenido whatapp testing api v1.022 ..."
   });
 });
 
