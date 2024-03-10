@@ -14,7 +14,7 @@ RUN npm install
 COPY .dockerignore ./
 
 # Expone el puerto en el que se ejecuta la aplicación
-EXPOSE 4000
+EXPOSE 8080
 
 # Comando para iniciar la aplicación
 CMD ["npm", "start"]
