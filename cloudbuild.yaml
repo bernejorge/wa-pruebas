@@ -1,0 +1,5 @@
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['build', '-t',  'gcr.io/wa-test-416816/github.com/bernejorge/wa-pruebas:$SHORT_SHA', '.']
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push', '-t',  'gcr.io/wa-test-416816/github.com/bernejorge/wa-pruebas:$SHORT_SHA', '.']
