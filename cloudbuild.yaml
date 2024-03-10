@@ -3,3 +3,5 @@ steps:
   args: ['build', '-t',  'gcr.io/wa-test-416816/github.com/bernejorge/wa-pruebas:$SHORT_SHA', '.']
 - name: 'gcr.io/cloud-builders/docker'
   args: ['push', '-t',  'gcr.io/wa-test-416816/github.com/bernejorge/wa-pruebas:$SHORT_SHA', '.']
+- name: 'gcr.io/cloud-builders/gcloud'
+  args: ['beta', 'run', 'deploy', 'wa-test', '--region=us-central1', '--platform=managed', '--image=gcr.io/wa-test-416816/github.com/bernejorge/wa-pruebas:$SHORT_SHA']   
