@@ -9,7 +9,7 @@ config();
 const token = process.env.WHATSAPP_TOKEN;
 
 const app = express();
-const port = 4000;
+const port = process.env.PORT || 4000;
 
 // Habilitar CORS para todos los orígenes
 app.use(cors());
