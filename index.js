@@ -106,9 +106,9 @@ app.post("/webhook", async (req, res) => { // Asegúrate de que la función es a
  });
 
  app.post('/sendTemplateMessage', async (req, res) => {
-  const apiVersion = process.env.API_VERSION;
-  const phoneNumberId = req.body.phoneNumberId || process.env.BUSSINESS_PHONE_NUMBER_ID;
-  const accessToken = req.body.accessToken || process.env.WHATSAPP_TOKEN;
+  const apiVersion = process.env.API_VERSION; //version de api en whatsapp cloud *ver en la pagina de a la app
+  const phoneNumberId = req.body.phoneNumberId || process.env.BUSSINESS_PHONE_NUMBER_ID; //Phone number id que asigna facebook al telefono
+  const accessToken = req.body.accessToken || process.env.WHATSAPP_TOKEN; //access token que asigna facebook *ver en la pagina de a la app
   const { recipientNumber, templateName, headerParams, bodyParams, footerParams } = req.body;
 
   // URL para enviar mensajes de plantilla a través de la API de WhatsApp
@@ -142,7 +142,7 @@ app.post("/webhook", async (req, res) => { // Asegúrate de que la función es a
     template: {
       name: templateName,
       language: {
-        code: "es_AR" // Todos los templates estan en español argentina, ajustar si es necesario
+        code: "es_AR" // Todos los templates estan en español argentina, ajustar si es necesario. Es decir pasarlo como parametro
       },
       components: components.length > 0 ? components : undefined
     }
@@ -248,10 +248,10 @@ async function saveBase64FileAndGetDetails(base64Data, mimeType) {
   // Determinar el tipo basado en el MIME type
   const type = mimeType.startsWith('image/') ? 'image' : 'document';
 
-  // Utilizar una variable de entorno para el URL base (asegúrate de configurar esto cuando despliegues tu servicio)
+  // Utilizar una variable de entorno para el URL base (configurar esto cuando despliegue el servicio)
   const baseUrl = process.env.BASE_URL; // Ejemplo: 'https://tu-servicio.a.run.app'
   
-  // Construir y devolver la URL usando el URL base y el nombre del archivo
+  // Construir y devolver la URL usando el URL base y el nombre del archivo. Facebook necestia el archivo publico para enviarlo en el mensaje
   const fileUrl = `${baseUrl}/uploads/${fileName}`;
 
   return { fileUrl, type };
