@@ -4,17 +4,20 @@ FROM node:21-alpine3.18
 # Establece el directorio de trabajo dentro del contenedor
 WORKDIR /app
 
-# Copia los archivos del proyecto al directorio de trabajo del contenedor
-COPY . .
+# Copia el archivo package.json y package-lock.json al contenedor
+COPY package*.json ./
 
-# Instala las dependencias del proyecto
+# Instala las dependencias
 RUN npm install
 
-# Excluye la carpeta node_modules durante la copia
-COPY .dockerignore ./
+# Copia todo el código fuente al contenedor
+COPY . .
 
-# Expone el puerto en el que se ejecuta la aplicación
-EXPOSE 8080
+# Expone el puerto en el que la aplicación estará corriendo
+EXPOSE 3000
 
-# Comando para iniciar la aplicación
+# Establece la variable de entorno NODE_ENV a production
+#ENV NODE_ENV=production
+
+# Comando para correr la aplicación
 CMD ["npm", "start"]
