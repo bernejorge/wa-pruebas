@@ -35,8 +35,10 @@ router.post('/webhook', (req, res) => {
                 const value = change.value;
 
                 if (value.messages) {
+                    const phone_number_id = value.metadata.phone_number_id; // Extrae el phone_number_id
+
                     value.messages.forEach(message => {
-                        messageHandler(message);
+                        messageHandler(message, phone_number_id); // Pasa el phone_number_id al handler
                     });
                 }
 

@@ -3,13 +3,13 @@ import handleButtonMessage from "./buttonHandler.mjs";
 import handleInteractiveMessage from "./interactiveHandler.mjs";
 import handleMessageStatus from "./statusHandler.mjs";
 
-const messageHandler = (message) => {
+const messageHandler = (message, phone_number_id) => {
   if (message.text) {
-    handleTextMessage(message);
+    handleTextMessage(message, phone_number_id); // Pasa el phone_number_id
   } else if (message.button) {
-    handleButtonMessage(message);
+    handleButtonMessage(message, phone_number_id);
   } else if (message.interactive) {
-    handleInteractiveMessage(message);
+    handleInteractiveMessage(message, phone_number_id);
   } else if (message.statuses) {
     message.statuses.forEach(handleMessageStatus);
   } else {
