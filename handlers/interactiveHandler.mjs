@@ -1,9 +1,9 @@
-const handleInteractiveMessage = (message) => {
+const handleInteractiveMessage = (message, phone_number_id) => {
    const interactiveData = message.interactive;
    const from = message.from;
 
    console.log(`Interactive message received from ${from}:`, interactiveData);
-   // Lógica adicional para procesar mensajes interactivos
+   // Lógica para procesar mensajes interactivos
 };
 
 export default handleInteractiveMessage;
