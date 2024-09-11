@@ -2,6 +2,7 @@ import handleTextMessage from "./textHandler.mjs";
 import handleButtonMessage from "./buttonHandler.mjs";
 import handleInteractiveMessage from "./interactiveHandler.mjs";
 import handleMessageStatus from "./statusHandler.mjs";
+import handleMediaMessage from "./mediaHandler.mjs"; 
 
 const messageHandler = (message, phone_number_id) => {
   if (message.text) {
@@ -12,6 +13,8 @@ const messageHandler = (message, phone_number_id) => {
     handleInteractiveMessage(message, phone_number_id);
   } else if (message.statuses) {
     message.statuses.forEach(handleMessageStatus);
+  } else if (message.image || message.video || message.audio || message.document || message.sticker) {
+    handleMediaMessage(message, phone_number_id); 
   } else {
     console.log("Tipo de mensaje no manejado:", message);
   }
