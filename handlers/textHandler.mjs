@@ -1,13 +1,16 @@
-import fetch from 'node-fetch'; // Asegúrate de que 'node-fetch' esté instalado
+import fetch from 'node-fetch';
 import axios from 'axios'; // Para enviar la respuesta al teléfono
+import dotenv from 'dotenv';
 
-const flowiseApiUrl = "http://149.50.142.145:3001/api/v1/prediction/feddcaa1-24d3-437f-a774-17dc917faa9c";
-const flowiseAuthToken = "Bearer qdMWjrAi0bhLyl_7KWkBHwrOtSEyCrHagMCtXvu9XTg";
+dotenv.config();
+
+const flowiseApiUrl = process.env.FLOWISE_API_URL || "http://149.50.142.145:3001/api/v1/prediction/feddcaa1-24d3-437f-a774-17dc917faa9c";
+const flowiseAuthToken = process.env.FLOWISE_AUTH_TOKEN || "qdMWjrAi0bhLyl_7KWkBHwrOtSEyCrHagMCtXvu9XTg";
 
 async function query(data) {
     const response = await fetch(flowiseApiUrl, {
         headers: {
-            Authorization: flowiseAuthToken,
+            Authorization: 'Bearer ' + flowiseAuthToken,
             "Content-Type": "application/json"
         },
         method: "POST",
