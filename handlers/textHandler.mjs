@@ -30,7 +30,7 @@ const handleTextMessage = async (message, phone_number_id) => {
     const requestData = { 
         question: text,
         overrideConfig:{
-            sessionId: from
+            sessionId: phone_number_id + "/" + from
         }
     };
 
