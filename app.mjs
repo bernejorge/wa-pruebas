@@ -2,6 +2,7 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
 import webhookRouter from './routes/webhook.mjs';
+import toolsRouter from './routes/tools.routes.mjs';
 
 dotenv.config();
 
@@ -17,6 +18,8 @@ app.get('/', async (req, res) => {
  });
 
 app.use(webhookRouter);
+
+app.use(toolsRouter);
 
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
