@@ -8,7 +8,7 @@ dotenv.config();
 async function query(data, phone_number_id) {
 
     const flowiseApiUrl = (phone_number_id == '330861496787830' ? process.env.FLOWISE_API_URL : process.env.FLOWISE_API_URL2) ;
-    const flowiseAuthToken = process.env.FLOWISE_AUTH_TOKEN || "qdMWjrAi0bhLyl_7KWkBHwrOtSEyCrHagMCtXvu9XTg";
+    const flowiseAuthToken = process.env.FLOWISE_AUTH_TOKEN;
 
     const response = await fetch(flowiseApiUrl, {
         headers: {
