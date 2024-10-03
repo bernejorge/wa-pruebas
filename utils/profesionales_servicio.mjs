@@ -47,69 +47,70 @@ export const searchByEmbedding = async (inputText, tableName) => {
 };
 
 export const getGroupByCentro = async (inputText, tableName) => {
-   try {
-     // Llamar a searchByEmbedding con el texto de entrada
-     const results = await searchByEmbedding(inputText, tableName);
- 
-     // Objeto para agrupar los datos por CentroDeAtencion
-     const groupedData = {};
- 
-     results.forEach((row) => {
-       // Parsear el campo pageContent
-       const parsedContent = parsePageContent(row.pageContent);
- 
-       const {
-         Institucion,
-         IdCentroAtencion,
-         CentroDeAtencion,
-         IdProfesional,
-         Profesional,
-         IdServicio,
-         Servicio,
-       } = parsedContent;
- 
-       // Si el CentroDeAtencion no existe en groupedData, inicializarlo
-       const key = `${IdCentroAtencion}-${CentroDeAtencion}`;
-       if (!groupedData[key]) {
-         groupedData[key] = {
-           Institucion,
-           IdCentroAtencion: Number(IdCentroAtencion),
-           CentroDeAtencion,
-           Profesionales: [],
-         };
-       }
- 
-       // Agregar el profesional a la lista de profesionales
-       groupedData[key].Profesionales.push({
-         IdProfesional: Number(IdProfesional),
-         Profesional,
-         IdServicio: Number(IdServicio),
-         Servicio,
-       });
-     });
- 
-     // Convertir groupedData en un array
-     const groupedDataArray = Object.values(groupedData);
- 
-     return groupedDataArray;
-   } catch (error) {
-     console.error('Error al obtener y agrupar los datos:', error);
-     throw error;
-   }
- };
+  try {
+    // Llamar a searchByEmbedding con el texto de entrada
+    const results = await searchByEmbedding(inputText, tableName);
 
- // Función para parsear el campo pageContent
+    // Objeto para agrupar los datos por CentroDeAtencion
+    const groupedData = {};
+
+    results.forEach((row) => {
+      // Parsear el campo pageContent
+      const parsedContent = parsePageContent(row.pageContent);
+
+      const {
+        Origen,
+        Institucion,
+        IdCentroAtencion,
+        CentroDeAtencion,
+        IdProfesional,
+        Profesional,
+        IdServicio,
+        Servicio,
+      } = parsedContent;
+
+      // Si el CentroDeAtencion no existe en groupedData, inicializarlo
+      const key = `${IdCentroAtencion}-${CentroDeAtencion}`;
+      if (!groupedData[key]) {
+        groupedData[key] = {
+          Institucion,
+          IdCentroAtencion: Number(IdCentroAtencion),
+          CentroDeAtencion,
+          Profesionales: [],
+        };
+      }
+
+      // Agregar el profesional a la lista de profesionales
+      groupedData[key].Profesionales.push({
+        Origen,
+        IdProfesional: Number(IdProfesional),
+        Profesional,
+        IdServicio: Number(IdServicio),
+        Servicio,
+      });
+    });
+
+    // Convertir groupedData en un array
+    const groupedDataArray = Object.values(groupedData);
+
+    return groupedDataArray;
+  } catch (error) {
+    console.error("Error al obtener y agrupar los datos:", error);
+    throw error;
+  }
+};
+
+// Función para parsear el campo pageContent
 const parsePageContent = (pageContent) => {
-   const lines = pageContent.split('\n');
-   const data = {};
- 
-   lines.forEach((line) => {
-     const [key, ...rest] = line.split(': ');
-     if (key && rest.length > 0) {
-       data[key.trim()] = rest.join(': ').trim();
-     }
-   });
- 
-   return data;
- };
- 
+  const lines = pageContent.split("\n");
+  const data = {};
+
+  lines.forEach((line) => {
+    const [key, ...rest] = line.split(": ");
+    if (key && rest.length > 0) {
+      data[key.trim()] = rest.join(": ").trim();
+    }
+  });
+
+  return data;
+};
