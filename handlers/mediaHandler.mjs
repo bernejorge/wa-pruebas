@@ -37,7 +37,7 @@ const handleMediaMessage = async (message, phone_number_id) => {
         const flowiseResponse = await queryFlowise({
             question: transcription,
             overrideConfig: { sessionId: from }
-        });
+        }, phone_number_id);
 
         const flowiseAnswer = flowiseResponse.text || "No se pudo obtener una respuesta de Flowise";
 

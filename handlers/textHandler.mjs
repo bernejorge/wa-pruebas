@@ -1,5 +1,6 @@
 import fetch from 'node-fetch';
-import axios from 'axios'; // Para enviar la respuesta al teléfono
+import axios from 'axios'; 
+import {getFlowiseToken, getFlowiseURL} from './../utils/flowiseApi.mjs'
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -7,8 +8,8 @@ dotenv.config();
 
 async function query(data, phone_number_id) {
 
-    const flowiseApiUrl = (phone_number_id == '330861496787830' ? process.env.FLOWISE_API_URL : process.env.FLOWISE_API_URL2) ;
-    const flowiseAuthToken = process.env.FLOWISE_AUTH_TOKEN;
+    const flowiseApiUrl = getFlowiseURL(phone_number_id);
+    const flowiseAuthToken = getFlowiseToken(phone_number_id);
 
     const response = await fetch(flowiseApiUrl, {
         headers: {
