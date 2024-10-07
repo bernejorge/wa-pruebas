@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+const api_ver =  process.env.API_VERSION;
 
 async function query(data, phone_number_id) {
 
@@ -52,7 +53,7 @@ const handleTextMessage = async (message, phone_number_id) => {
             }
         };
 
-        await axios.post(`https://graph.facebook.com/v20.0/${phone_number_id}/messages`, replyMessage, {
+        await axios.post(`https://graph.facebook.com/${api_ver}/${phone_number_id}/messages`, replyMessage, {
             headers: {
                 Authorization: `Bearer ${process.env.WHATSAPP_TOKEN}`,
                 "Content-Type": "application/json"

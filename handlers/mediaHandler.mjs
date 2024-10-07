@@ -4,6 +4,12 @@ import FormData from 'form-data';
 import { queryFlowise } from '../utils/flowiseApi.mjs'; 
 import path from 'path';
 
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+const api_ver =  process.env.API_VERSION;
+
 const handleMediaMessage = async (message, phone_number_id) => {
     const from = message.from;
 
@@ -36,7 +42,7 @@ const handleMediaMessage = async (message, phone_number_id) => {
         // Enviar la transcripción a Flowise
         const flowiseResponse = await queryFlowise({
             question: transcription,
-            overrideConfig: { sessionId: from }
+            overrideConfig: { sessionId: phone_number_id + "/" + from }
         }, phone_number_id);
 
         const flowiseAnswer = flowiseResponse.text || "No se pudo obtener una respuesta de Flowise";
@@ -57,7 +63,7 @@ const handleMediaMessage = async (message, phone_number_id) => {
 // Función para obtener la URL del archivo multimedia
 const getMediaUrl = async (mediaId) => {
     try {
-        const response = await axios.get(`https://graph.facebook.com/v20.0/${mediaId}`, {
+        const response = await axios.get(`https://graph.facebook.com/${api_ver}/${mediaId}`, {
             headers: {
                 Authorization: `Bearer ${process.env.WHATSAPP_TOKEN}`
             }

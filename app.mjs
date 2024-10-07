@@ -3,6 +3,7 @@ import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
 import webhookRouter from './routes/webhook.mjs';
 import toolsRouter from './routes/tools.routes.mjs';
+import {envCheck} from './middlewares/testing.middleware.mjs'
 
 dotenv.config();
 
@@ -10,6 +11,10 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(bodyParser.json());
+
+//middleware para quitar los 9 de numeros de telefono en testing
+//5493413500536 -> 543413500536
+app.use(envCheck);
 
 app.get('/', async (req, res) => {
    res.json({

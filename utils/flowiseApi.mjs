@@ -31,5 +31,6 @@ export const getFlowiseURL = (phone_number_id) => {
 export const getFlowiseToken = (phone_number_id) => {
     //por el momento usamos un mismo token para ambos chatbots
     const flowiseAuthToken = process.env.FLOWISE_AUTH_TOKEN;
+    if(flowiseAuthToken)
     return flowiseAuthToken;
 }
