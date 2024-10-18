@@ -76,7 +76,7 @@ router.post("/turnos/obtener-prestaciones", async (req, res) => {
 
 router.post("/turnos/obtener_primeros_turnos", async (req, res) => {
   try {
-    ///api/Turnos/ObtenerPrimerosTurnos
+    ///api/Turnos/ObtenerPrimerosTurnosWsp
     const {
       IdCentroAtencion,
       IdServicio,
@@ -86,7 +86,7 @@ router.post("/turnos/obtener_primeros_turnos", async (req, res) => {
       IdCobertura,
     } = req.body;
     const fromToken = "webhook"; // El token de acceso está en los headers
-    const apiUrl = `${process.env.API_BASE_URL}/api/Turnos/ObtenerPrimerosTurnos`;
+    const apiUrl = `${process.env.API_BASE_URL}/api/Turnos/ObtenerPrimerosTurnosWsp`;
 
     //construccion del params
     const params = {
@@ -135,7 +135,7 @@ router.post("/turnos/asignar", async (req, res) => {
     const { IdPersona, IdTurno, IdPrestacion, IdCobertura } = req.body;
     const email = "";
     const fromToken = "webhook"; // El token de acceso está en los headers
-    const apiUrl = `${process.env.API_BASE_URL}/api/Turnos/Asignar`;
+    const apiUrl = `${process.env.API_BASE_URL}/api/Turnos/AsignarTurnoWsp`;
 
     //construccion del params
     const params = {
@@ -161,9 +161,29 @@ router.post("/turnos/asignar", async (req, res) => {
 
   } catch (error) {
 
-   console.error("Error al llamar a Turnos/Asignar: " , error);
+   console.error("Error al llamar a Turnos/AsignarTurnoWsp: " , error);
    res.status(500).json({ error: error.message + '/n Resvisa que los ids sean los correctos, deben ser los seleccionados por el usuario en los pasos anteriores.', });
 
+  }
+});
+
+router.post("/turnos/mis-turnos",  async (req, res) =>{
+  try {
+    const idPersona = req.body.IdPersona;
+    const fromToken = "webhook";
+    const apiUrl = `${process.env.API_BASE_URL}/api/Turnos/ConsultarProximosTurnosWsp`;
+
+    const params = {
+      idPersona: idPersona,
+      idPersonaRelacion: idPersona
+    };
+    const response = await axios.get(apiUrl,{
+      params: params,
+      headers: { From: fromToken },
+    });
+    res.json(response.data);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
 
