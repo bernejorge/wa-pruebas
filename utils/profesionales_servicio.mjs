@@ -19,7 +19,7 @@ const pool = new Pool({
 });
 
 // Búsqueda por similitud utilizando el campo de embedding
-export const searchByEmbedding = async (inputText, tableName) => {
+export const searchByEmbedding = async (inputText, tableName, limit = 40) => {
   try {
     // Generar el embedding del texto de entrada usando OpenAI
     const embeddingResponse = await openai.embeddings.create({
@@ -33,11 +33,11 @@ export const searchByEmbedding = async (inputText, tableName) => {
       SELECT id, "pageContent"
       FROM ${tableName}
       ORDER BY embedding <=> $1
-      LIMIT 40;
+      LIMIT $2;
     `;
 
     // Ejecutar la consulta pasando el embedding de entrada
-    const result = await pool.query(query, [`[${embedding.join(",")}]`]);
+    const result = await pool.query(query, [`[${embedding.join(",")}]`, limit]);
 
     return result.rows;
   } catch (error) {
@@ -46,10 +46,10 @@ export const searchByEmbedding = async (inputText, tableName) => {
   }
 };
 
-export const getGroupByCentro = async (inputText, tableName) => {
+export const getGroupByCentro = async (inputText, tableName, limit = 40) => {
   try {
     // Llamar a searchByEmbedding con el texto de entrada
-    const results = await searchByEmbedding(inputText, tableName);
+    const results = await searchByEmbedding(inputText, tableName, limit);
 
     // Objeto para agrupar los datos por CentroDeAtencion
     const groupedData = {};
