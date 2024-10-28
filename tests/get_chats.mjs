@@ -73,8 +73,8 @@ function saveMessagesToFile(data) {
      `;
  
      // Crear un nombre de archivo único, usando el sessionId o el índice
-     const fileName = `conversation_${element.sessionId || index}.txt`;
-     
+     let fileName = `conversation_${element.sessionId || index}.txt`;
+     fileName = fileName.replace('/', '_');
      // Guardar el archivo en el directorio actual
      const filePath = path.join(process.cwd(), fileName);
  

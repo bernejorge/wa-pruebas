@@ -158,16 +158,17 @@ router.post("/turnos/asignar", async (req, res) => {
     });
 
     res.json(response.data);
-
   } catch (error) {
-
-   console.error("Error al llamar a Turnos/AsignarTurnoWsp: " , error);
-   res.status(500).json({ error: error.message + '/n Resvisa que los ids sean los correctos, deben ser los seleccionados por el usuario en los pasos anteriores.', });
-
+    console.error("Error al llamar a Turnos/AsignarTurnoWsp: ", error);
+    res.status(500).json({
+      error:
+        error.message +
+        "/n Resvisa que los ids sean los correctos, deben ser los seleccionados por el usuario en los pasos anteriores.",
+    });
   }
 });
 
-router.post("/turnos/mis-turnos",  async (req, res) =>{
+router.post("/turnos/mis-turnos", async (req, res) => {
   try {
     const idPersona = req.body.IdPersona;
     const fromToken = "webhook";
@@ -175,9 +176,9 @@ router.post("/turnos/mis-turnos",  async (req, res) =>{
 
     const params = {
       idPersona: idPersona,
-      idPersonaRelacion: idPersona
+      idPersonaRelacion: idPersona,
     };
-    const response = await axios.get(apiUrl,{
+    const response = await axios.get(apiUrl, {
       params: params,
       headers: { From: fromToken },
     });
@@ -186,5 +187,155 @@ router.post("/turnos/mis-turnos",  async (req, res) =>{
     res.status(500).json({ error: error.message });
   }
 });
+
+router.post("/turnos/turno-mas-proximo", async (req, res) => {
+  try {
+    let input = req.body.Profesionales;
+    const { IdServicio, IdCentro, IdPersona, IdCobertura } = req.body;
+
+    // Check if 'Profesionales' exists in the request body
+    if (!input) {
+      return res.status(400).json({
+        error:
+          "El campo 'Profesionales' es requerido en el cuerpo de la solicitud.",
+      });
+    }
+
+    // If 'input' is a string, attempt to parse it as JSON
+    if (typeof input === "string") {
+      try {
+        input = JSON.parse(input);
+      } catch (e) {
+        return res
+          .status(400)
+          .json({ error: "Formato JSON inválido para 'Profesionales'." });
+      }
+    }
+
+    // Verify that 'input' is an object with a 'Profesionales' array
+    if (!input || !Array.isArray(input)) {
+      return res.status(400).json({
+        error:
+          "'Profesionales' debe ser un objeto que contiene un arreglo 'Profesionales'.",
+      });
+    }
+
+    // Validate each item in the 'Profesionales' array
+    for (const prof of input) {
+      if (
+        !prof.hasOwnProperty("IdProfesional") ||
+        typeof prof.IdProfesional !== "number" ||
+        !Number.isInteger(prof.IdProfesional)
+      ) {
+        return res.status(400).json({
+          error:
+            "Cada elemento en 'Profesionales' debe tener un 'IdProfesional' entero.",
+        });
+      }
+    }
+
+    // Extract 'IdProfesional's for further processing
+    const ids = input.map((p)=> p.IdProfesional);
+    let turnos = [];
+    for (const IdProfesional of ids) {
+      try {
+        const data = await obtenerPrestaciones(IdCentro, IdServicio, IdProfesional);
+        const prestaciones = data.Prestaciones;
+        
+        for (const prestacion of prestaciones){
+          const IdPrestacion = prestacion.IdPrestacion;
+          try {
+            const dataTurnos = await obtenerPrimerosTurnos(IdCentro, IdServicio, IdProfesional, IdPrestacion, IdPersona, IdCobertura);
+            const turnosProfesional = dataTurnos.map((t) =>({
+              ...t,
+              ...prestacion
+            }) )
+            console.log(turnosProfesional);
+            turnos.push(...turnosProfesional);
+
+          } catch (error) {
+            
+          }
+        } 
+
+        console.log(prestaciones);
+      } catch (error) {
+
+      }
+    }
+   
+    let msg= "";
+    if(turnos.length == 0){
+      msg = `No se encontraron turnos para los Ids ' + ${input}. 
+      Revisa que sean los recuperados con la herramienta "profesionalesferreyra"`;
+    }
+    res.status(200).json({ message: "Validación exitosa.", turnos });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error interno del servidor." });
+  }
+});
+
+async function obtenerPrestaciones(IdCentroAtencion, IdServicio, IdProfesional) {
+  const fromToken = "webhook"; // Token de acceso en los headers
+  const apiUrl = `${process.env.API_BASE_URL}/api/Turnos/ObtenerPrestaciones`;
+
+  try {
+    const response = await axios.post(apiUrl, null, {
+      params: {
+        IdProfesional,
+        IdCentro: IdCentroAtencion,
+        IdServicio,
+      },
+      headers: { From: fromToken },
+    });
+    return response.data.Prestaciones;
+  } catch (error) {
+    console.error(
+      "Error al llamar a la API externa /api/Turnos/ObtenerPrestaciones:",
+      error
+    );
+    throw new Error("Error al obtener prestaciones");
+  }
+};
+
+async function obtenerPrimerosTurnos(IdCentroAtencion, IdServicio, IdProfesional, IdPrestacion, IdPersona, IdCobertura) {
+  const fromToken = "webhook"; // Token de acceso en los headers
+  const apiUrl = `${process.env.API_BASE_URL}/api/Turnos/ObtenerPrimerosTurnosWsp`;
+
+  // Construcción de params y body
+  const params = {
+    idPersona: IdPersona,
+    idPersonaRelacion: IdPersona,
+    idCentro: IdCentroAtencion,
+  };
+
+  const body = {
+    IdServicio: IdServicio,
+    IdsRecursos: [IdProfesional],
+    IdCobertura: IdCobertura,
+    IdPrestacion: IdPrestacion,
+  };
+
+  try {
+    const response = await axios.post(apiUrl, body, {
+      params: params,
+      headers: { From: fromToken },
+    });
+
+    // Mapea los turnos para el formato requerido
+    const turnos = response.data.Turnos.map((turno) => ({
+      IdTurno: turno.Id,
+      Fecha: turno.Fecha,
+      Profesional: turno.Medico,
+      IdProfesional: turno.IdRecurso,
+    }));
+
+    return turnos;
+  } catch (error) {
+    console.error("Error al llamar a ObtenerPrimerosTurnos:", error);
+    throw new Error("Error al obtener los primeros turnos");
+  }
+};
 
 export default router;
