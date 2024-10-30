@@ -55,9 +55,12 @@ router.get("/turnos/validar-dni", async (req, res) => {
 
 router.post("/turnos/obtener-prestaciones", async (req, res) => {
   try {
+
+    ///api/Meta/ObtenerPrestaciones
+
     const { IdCentroAtencion, IdServicio, IdProfesional } = req.body;
     const fromToken = "webhook"; // El token de acceso está en los headers
-    const apiUrl = `${process.env.API_BASE_URL}/api/Turnos/ObtenerPrestaciones`;
+    const apiUrl = `${process.env.API_BASE_URL}/api/Meta/ObtenerPrestaciones`;
 
     const response = await axios.post(apiUrl, null, {
       params: {
@@ -71,7 +74,7 @@ router.post("/turnos/obtener-prestaciones", async (req, res) => {
 
     res.json(data);
   } catch (error) {
-    console.error("Error al llamar a la API externa /api/Turnos/ObtenerPrestaciones:", error);
+    console.error("Error al llamar a la API externa /api/Meta/ObtenerPrestaciones: ", error);
     
     // Verifica si el error viene con una respuesta del backend externo
     const errorMessage = error.response && error.response.data
@@ -84,7 +87,7 @@ router.post("/turnos/obtener-prestaciones", async (req, res) => {
 
 router.post("/turnos/obtener_primeros_turnos", async (req, res) => {
   try {
-    ///api/Turnos/ObtenerPrimerosTurnosWsp
+    ///api/Meta/ObtenerPrimerTurnos
     const {
       IdCentroAtencion,
       IdServicio,
@@ -94,21 +97,22 @@ router.post("/turnos/obtener_primeros_turnos", async (req, res) => {
       IdCobertura,
     } = req.body;
     const fromToken = "webhook"; // El token de acceso está en los headers
-    const apiUrl = `${process.env.API_BASE_URL}/api/Turnos/ObtenerPrimerosTurnosWsp`;
+    const apiUrl = `${process.env.API_BASE_URL}/api/Meta/ObtenerPrimerTurnos`;
 
     //construccion del params
     const params = {
       idPersona: IdPersona,
       idPersonaRelacion: IdPersona,
-      idCentro: IdCentroAtencion,
+      idCentrAtencion: IdCentroAtencion,
+      idServicio: IdServicio,
+      idRecurso: IdProfesional,
+      idCobertura: IdCobertura,
+      idPrestacion: IdPrestacion,
     };
 
     //construccion del body
     const body = {
-      IdServicio: IdServicio,
-      IdsRecursos: [IdProfesional],
-      IdCobertura: IdCobertura,
-      IdPrestacion: IdPrestacion,
+     
     };
 
     const response = await axios.post(apiUrl, body, {
@@ -141,24 +145,26 @@ router.post("/turnos/obtener_primeros_turnos", async (req, res) => {
 
 router.post("/turnos/asignar", async (req, res) => {
   try {
+
+    ///api/Meta/AsignarTurno
+
     const { IdPersona, IdTurno, IdPrestacion, IdCobertura } = req.body;
     const email = "";
     const fromToken = "webhook"; // El token de acceso está en los headers
-    const apiUrl = `${process.env.API_BASE_URL}/api/Turnos/AsignarTurnoWsp`;
+    const apiUrl = `${process.env.API_BASE_URL}/api/Meta/AsignarTurno`;
 
     //construccion del params
     const params = {
       idPersona: IdPersona,
-      idPersonaRelacion: IdPersona,
+      idTurno: IdTurno,
+      idPrestacion: IdPrestacion,
+      idCobertura: IdCobertura,
+      emailDestinatario: email,
     };
 
     //construccion del body
     const body = {
-      IdTurno: IdTurno,
-      IdPrestacion: IdPrestacion,
-      IdCobertura: IdCobertura,
-      EmailDestinatario: email,
-      EmailDestinatarioConDatosDeContacto: email,
+    
     };
 
     const response = await axios.post(apiUrl, body, {
@@ -168,7 +174,7 @@ router.post("/turnos/asignar", async (req, res) => {
 
     res.json(response.data);
   } catch (error) {
-    console.error("Error al llamar a Turnos/AsignarTurnoWsp: ", error);
+    console.error("Error al llamar a Turnos/AsignarTurno: ", error);
     // Verifica si el error viene con una respuesta del backend externo
     const errorMessage = error.response && error.response.data
       ? error.response.data
@@ -180,9 +186,10 @@ router.post("/turnos/asignar", async (req, res) => {
 
 router.post("/turnos/mis-turnos", async (req, res) => {
   try {
+    ///api/Meta/ConsultarProximosTurnos
     const idPersona = req.body.IdPersona;
     const fromToken = "webhook";
-    const apiUrl = `${process.env.API_BASE_URL}/api/Turnos/ConsultarProximosTurnosWsp`;
+    const apiUrl = `${process.env.API_BASE_URL}/api/Meta/ConsultarProximosTurnos`;
 
     const params = {
       idPersona: idPersona,

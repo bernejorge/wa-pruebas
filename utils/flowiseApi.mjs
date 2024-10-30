@@ -24,6 +24,8 @@ export const queryFlowise = async (data, phone_number_id) => {
 };
 
 export const getFlowiseURL = (phone_number_id) => {
+  //HP => FLOWISE_API_URL
+  //HRF => FLOWISE_API_URL2
     const flowiseApiUrl = (phone_number_id == '330861496787830' ? process.env.FLOWISE_API_URL : process.env.FLOWISE_API_URL2) ;
     return flowiseApiUrl;
 }
