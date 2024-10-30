@@ -43,7 +43,13 @@ router.get("/turnos/validar-dni", async (req, res) => {
     res.json(data);
   } catch (error) {
     console.error("Error al llamar a la API externa /Meta/ValidarDNI:", error);
-    res.status(500).json({ error: error.message });
+
+    // Verifica si el error viene con una respuesta del backend
+    const errorMessage = error.response && error.response.data
+      ? error.response.data
+      : { mensaje: "Error desconocido al llamar a la API externa." };
+
+    res.status(error.response ? error.response.status : 500).json(errorMessage);
   }
 });
 
@@ -65,12 +71,14 @@ router.post("/turnos/obtener-prestaciones", async (req, res) => {
 
     res.json(data);
   } catch (error) {
-    console.error(
-      "Error al llamar a la API externa /api/Turnos/ObtenerPrestaciones:",
-      error,
-      "/n Por favor revisa los ids utilizados en la llamadas, No los debes inventar o alucinar."
-    );
-    res.status(500).json({ error: error });
+    console.error("Error al llamar a la API externa /api/Turnos/ObtenerPrestaciones:", error);
+    
+    // Verifica si el error viene con una respuesta del backend externo
+    const errorMessage = error.response && error.response.data
+      ? error.response.data
+      : { mensaje: "Error desconocido al llamar a la API externa." };
+
+    res.status(error.response ? error.response.status : 500).json(errorMessage);
   }
 });
 
@@ -121,12 +129,13 @@ router.post("/turnos/obtener_primeros_turnos", async (req, res) => {
     res.json(data);
   } catch (error) {
     // Manejo de errores
-    console.error(
-      "Error al llamar a ObtenerPrimerosTurnos:",
-      error +
-        "/n Resvisa que los ids sean los correctos, deben ser los seleccionados por el usuario en los pasos anteriores."
-    );
-    res.status(500).json({ error: error.message });
+    console.error("Error al llamar a ObtenerPrimerosTurnos:");
+    // Verifica si el error viene con una respuesta del backend externo
+    const errorMessage = error.response && error.response.data
+      ? error.response.data
+      : { mensaje: "Error desconocido al llamar a la API externa." };
+
+    res.status(error.response ? error.response.status : 500).json(errorMessage);
   }
 });
 
@@ -160,11 +169,12 @@ router.post("/turnos/asignar", async (req, res) => {
     res.json(response.data);
   } catch (error) {
     console.error("Error al llamar a Turnos/AsignarTurnoWsp: ", error);
-    res.status(500).json({
-      error:
-        error.message +
-        "/n Resvisa que los ids sean los correctos, deben ser los seleccionados por el usuario en los pasos anteriores.",
-    });
+    // Verifica si el error viene con una respuesta del backend externo
+    const errorMessage = error.response && error.response.data
+      ? error.response.data
+      : { mensaje: "Error desconocido al llamar a la API externa." };
+
+    res.status(error.response ? error.response.status : 500).json(errorMessage);
   }
 });
 
@@ -184,7 +194,14 @@ router.post("/turnos/mis-turnos", async (req, res) => {
     });
     res.json(response.data);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("Error al llamar a Turnos/ConsultarProximosTurnos", error);
+    
+    // Verifica si el error viene con una respuesta del backend externo
+    const errorMessage = error.response && error.response.data
+      ? error.response.data
+      : { mensaje: "Error desconocido al llamar a la API externa." };
+
+    res.status(error.response ? error.response.status : 500).json(errorMessage);
   }
 });
 
