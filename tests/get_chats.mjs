@@ -7,11 +7,16 @@ dotenv.config();
 
 // Configuración del cliente de PostgreSQL
 const pool = new Pool({
-   host: process.env.PG_HOST || "172.29.238.51", // Solo una vez, IP del servidor o variable de entorno
-   user: process.env.PG_USER || "admin",
-   database: process.env.PG_DB || "vector_commerce",
-   password: process.env.PG_PASSWORD || "admin",
-   port: process.env.PG_PORT || 5432,
+  //  host: process.env.PG_HOST || "172.29.238.51", // Solo una vez, IP del servidor o variable de entorno
+  //  user: process.env.PG_USER || "admin",
+  //  database: process.env.PG_DB || "vector_commerce",
+  //  password: process.env.PG_PASSWORD || "admin",
+  //  port: process.env.PG_PORT || 5432,
+    host: "172.29.230.73", // Solo una vez, IP del servidor o variable de entorno
+    user: "admin",
+    database: "vector_commerce",
+    password: "Tips2024PG01",
+    port: 5432,
 });
 
 async function getMessages(startDate, endDate) {
@@ -87,7 +92,7 @@ function saveMessagesToFile(data) {
    });
  }
 // Llamar la función
-getMessages('2024-10-18', '2024-12-31')
+getMessages('2024-11-05', '2024-11-06')
   .then(data => {
    saveMessagesToFile(data);
   })

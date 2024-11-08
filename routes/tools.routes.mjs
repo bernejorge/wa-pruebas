@@ -2,6 +2,7 @@ import express from "express";
 import messageHandler from "../handlers/messageHandler.mjs";
 import handleMessageStatus from "../handlers/statusHandler.mjs";
 import { getGroupByCentro } from "./../utils/profesionales_servicio.mjs";
+import axios from "axios";
 
 const router = express.Router();
 
@@ -83,6 +84,40 @@ router.get("/getByProfesionalNameHP", async (req, res) => {
   } catch (error) {
     console.error("Error en la ruta /getGroupByCentro:", error);
     res.status(500).json({ error: "Error interno del servidor." });
+  }
+});
+
+router.get("/obtenerPreparaciones", async (req, res) => {
+  try {
+    ///api/Meta/ObtenerPrestacionPorId
+    const IdPrestacion = req.query.IdPrestacion;
+    const fromToken = "webhook";
+
+    const apiUrl = `${process.env.API_BASE_URL}/api/Meta/ObtenerPrestacionPorId`;
+   
+    const response = await axios.post(apiUrl, null, {
+      params: {idPrestacion: IdPrestacion},
+      headers: { From: fromToken }
+    });
+
+    // Mapear los campos 
+    const { Id, Nombre, IntsruccionTxt, Exito } = response.data;
+
+    // Enviar solo los campos mapeados
+    res.json({ Id, Nombre, Instruccion: IntsruccionTxt, Exito });
+
+
+  } catch (error) {
+    console.error("Error en la ruta /obtenerPreparaciones:", error);
+     // Verifica si el error tiene una respuesta del servidor
+     if (error.response && error.response.data) {
+      // Extrae el mensaje de error del servidor
+      const serverMessage = error.response.data.Mensaje || "Error desconocido del servidor";
+      res.status(error.response.status).json({ error: serverMessage });
+    } else {
+      // Manejo de errores sin respuesta del servidor
+      res.status(500).json({ error: "Error al obtener las preparaciones" });
+    }
   }
 });
 

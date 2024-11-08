@@ -6,6 +6,17 @@ dotenv.config();
 
 const router = express.Router();
 
+// Middleware para registrar la ruta y los parámetros usados
+const logRouteAndParams = (req, res, next) => {
+  console.log(`Ruta llamada: ${req.originalUrl}`);
+  console.log("Parámetros:", req.method === "GET" ? req.query : req.body);
+  next();
+};
+
+// Aplica el middleware a todas las rutas
+router.use(logRouteAndParams);
+
+
 router.get("/turnos/validar-dni", async (req, res) => {
   try {
     const dni = req.query.dni; // Asumo que estás enviando el DNI por el body
