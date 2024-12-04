@@ -16,7 +16,6 @@ const logRouteAndParams = (req, res, next) => {
 // Aplica el middleware a todas las rutas
 router.use(logRouteAndParams);
 
-
 router.get("/turnos/validar-dni", async (req, res) => {
   try {
     const dni = req.query.dni; // Asumo que estás enviando el DNI por el body
@@ -56,9 +55,10 @@ router.get("/turnos/validar-dni", async (req, res) => {
     console.error("Error al llamar a la API externa /Meta/ValidarDNI:", error);
 
     // Verifica si el error viene con una respuesta del backend
-    const errorMessage = error.response && error.response.data
-      ? error.response.data
-      : { mensaje: "Error desconocido al llamar a la API externa." };
+    const errorMessage =
+      error.response && error.response.data
+        ? error.response.data
+        : { mensaje: "Error desconocido al llamar a la API externa." };
 
     res.status(error.response ? error.response.status : 500).json(errorMessage);
   }
@@ -66,7 +66,6 @@ router.get("/turnos/validar-dni", async (req, res) => {
 
 router.post("/turnos/obtener-prestaciones", async (req, res) => {
   try {
-
     ///api/Meta/ObtenerPrestaciones
 
     const { IdCentroAtencion, IdServicio, IdProfesional } = req.body;
@@ -85,12 +84,16 @@ router.post("/turnos/obtener-prestaciones", async (req, res) => {
 
     res.json(data);
   } catch (error) {
-    console.error("Error al llamar a la API externa /api/Meta/ObtenerPrestaciones: ", error);
-    
+    console.error(
+      "Error al llamar a la API externa /api/Meta/ObtenerPrestaciones: ",
+      error
+    );
+
     // Verifica si el error viene con una respuesta del backend externo
-    const errorMessage = error.response && error.response.data
-      ? error.response.data
-      : { mensaje: "Error desconocido al llamar a la API externa." };
+    const errorMessage =
+      error.response && error.response.data
+        ? error.response.data
+        : { mensaje: "Error desconocido al llamar a la API externa." };
 
     res.status(error.response ? error.response.status : 500).json(errorMessage);
   }
@@ -122,9 +125,7 @@ router.post("/turnos/obtener_primeros_turnos", async (req, res) => {
     };
 
     //construccion del body
-    const body = {
-     
-    };
+    const body = {};
 
     const response = await axios.post(apiUrl, body, {
       params: params,
@@ -146,9 +147,62 @@ router.post("/turnos/obtener_primeros_turnos", async (req, res) => {
     // Manejo de errores
     console.error("Error al llamar a ObtenerPrimerosTurnos:");
     // Verifica si el error viene con una respuesta del backend externo
-    const errorMessage = error.response && error.response.data
-      ? error.response.data
-      : { mensaje: "Error desconocido al llamar a la API externa." };
+    const errorMessage =
+      error.response && error.response.data
+        ? error.response.data
+        : { mensaje: "Error desconocido al llamar a la API externa." };
+
+    res.status(error.response ? error.response.status : 500).json(errorMessage);
+  }
+});
+
+router.post("/turnos/obtener_primeros_turnos_x_servicio", async (req, res) => {
+  try {
+    ///api/Meta/ObtenerPrimerTurnos
+    const {
+      IdServicio,
+      IdPrestacion,
+      IdPersona,
+      IdCobertura,
+    } = req.body;
+
+    if(IdPersona === 0 );
+    if(IdCobertura === 0);
+
+    const datosHRF = await obtenerPrimerosTurnos(19, IdServicio, IdPrestacion, IdPersona, IdCobertura);
+
+    const datosAnexo = await obtenerPrimerosTurnos(32, IdServicio, IdPrestacion, IdPersona, IdCobertura);
+    
+    const respuesta = {
+      Exito: true,
+      TurnoDisponibles: []
+    }
+
+    if (datosHRF.Turnos) respuesta.TurnoDisponibles.push(... datosHRF.Turnos)
+    if(datosAnexo.Turnos) respuesta.TurnoDisponibles.push(... datosAnexo.Turnos);
+
+    
+    const  turnos = respuesta.TurnoDisponibles.map((turno) => ({
+      IdTurno: turno.Id,
+      Fecha: turno.Fecha,
+      Profesional: turno.Medico,
+      IdProfesional: turno.IdRecurso,
+      Especialidad: turno.Especialidad,
+      Lugar: turno.Lugar,
+      IdCentroDeAtencion: turno.IdCentroDeAtencion
+    }));
+    
+    respuesta.TurnoDisponibles = turnos; //mi mapeo de turnos.
+
+    res.json(respuesta);
+  } catch (error) {
+    // Manejo de errores
+    console.error("Error al llamar a ObtenerPrimerosTurnos:");
+    // Verifica si el error viene con una respuesta del backend externo
+    const errorMessage =
+      error.response && error.response.data
+        ? error.response.data
+        : { mensaje: "Error desconocido al llamar a la API externa." };
 
     res.status(error.response ? error.response.status : 500).json(errorMessage);
   }
@@ -156,7 +210,6 @@ router.post("/turnos/obtener_primeros_turnos", async (req, res) => {
 
 router.post("/turnos/asignar", async (req, res) => {
   try {
-
     ///api/Meta/AsignarTurno
 
     const { IdPersona, IdTurno, IdPrestacion, IdCobertura } = req.body;
@@ -174,9 +227,7 @@ router.post("/turnos/asignar", async (req, res) => {
     };
 
     //construccion del body
-    const body = {
-    
-    };
+    const body = {};
 
     const response = await axios.post(apiUrl, body, {
       params: params,
@@ -187,9 +238,46 @@ router.post("/turnos/asignar", async (req, res) => {
   } catch (error) {
     console.error("Error al llamar a Turnos/AsignarTurno: ", error);
     // Verifica si el error viene con una respuesta del backend externo
-    const errorMessage = error.response && error.response.data
-      ? error.response.data
-      : { mensaje: "Error desconocido al llamar a la API externa." };
+    const errorMessage =
+      error.response && error.response.data
+        ? error.response.data
+        : { mensaje: "Error desconocido al llamar a la API externa." };
+
+    res.status(error.response ? error.response.status : 500).json(errorMessage);
+  }
+});
+
+router.post("/turnos/anular_turno", async (req, res) => {
+  try {
+    ///api/Meta/AnularTurno
+
+    const { IdPersona, IdTurno} = req.body;
+    const email = "";
+    const fromToken = "webhook"; // El token de acceso está en los headers
+    const apiUrl = `${process.env.API_BASE_URL}/api/Meta/AnularTurno`;
+
+    //construccion del params
+    const params = {
+      idPersona: IdPersona,
+      idTurno: IdTurno
+    };
+
+    //construccion del body
+    const body = {};
+
+    const response = await axios.post(apiUrl, body, {
+      params: params,
+      headers: { From: fromToken },
+    });
+
+    res.json(response.data);
+  } catch (error) {
+    console.error("Error al llamar a Turnos/AnularTurnos: ", error);
+    // Verifica si el error viene con una respuesta del backend externo
+    const errorMessage =
+      error.response && error.response.data
+        ? error.response.data
+        : { mensaje: "Error desconocido al llamar a la API externa." };
 
     res.status(error.response ? error.response.status : 500).json(errorMessage);
   }
@@ -213,11 +301,12 @@ router.post("/turnos/mis-turnos", async (req, res) => {
     res.json(response.data);
   } catch (error) {
     console.error("Error al llamar a Turnos/ConsultarProximosTurnos", error);
-    
+
     // Verifica si el error viene con una respuesta del backend externo
-    const errorMessage = error.response && error.response.data
-      ? error.response.data
-      : { mensaje: "Error desconocido al llamar a la API externa." };
+    const errorMessage =
+      error.response && error.response.data
+        ? error.response.data
+        : { mensaje: "Error desconocido al llamar a la API externa." };
 
     res.status(error.response ? error.response.status : 500).json(errorMessage);
   }
@@ -270,37 +359,43 @@ router.post("/turnos/turno-mas-proximo", async (req, res) => {
     }
 
     // Extract 'IdProfesional's for further processing
-    const ids = input.map((p)=> p.IdProfesional);
+    const ids = input.map((p) => p.IdProfesional);
     let turnos = [];
     for (const IdProfesional of ids) {
       try {
-        const data = await obtenerPrestaciones(IdCentro, IdServicio, IdProfesional);
+        const data = await obtenerPrestaciones(
+          IdCentro,
+          IdServicio,
+          IdProfesional
+        );
         const prestaciones = data.Prestaciones;
-        
-        for (const prestacion of prestaciones){
+
+        for (const prestacion of prestaciones) {
           const IdPrestacion = prestacion.IdPrestacion;
           try {
-            const dataTurnos = await obtenerPrimerosTurnos(IdCentro, IdServicio, IdProfesional, IdPrestacion, IdPersona, IdCobertura);
-            const turnosProfesional = dataTurnos.map((t) =>({
+            const dataTurnos = await obtenerPrimerosTurnos(
+              IdCentro,
+              IdServicio,
+              IdProfesional,
+              IdPrestacion,
+              IdPersona,
+              IdCobertura
+            );
+            const turnosProfesional = dataTurnos.map((t) => ({
               ...t,
-              ...prestacion
-            }) )
+              ...prestacion,
+            }));
             console.log(turnosProfesional);
             turnos.push(...turnosProfesional);
-
-          } catch (error) {
-            
-          }
-        } 
+          } catch (error) {}
+        }
 
         console.log(prestaciones);
-      } catch (error) {
-
-      }
+      } catch (error) {}
     }
-   
-    let msg= "";
-    if(turnos.length == 0){
+
+    let msg = "";
+    if (turnos.length == 0) {
       msg = `No se encontraron turnos para los Ids ' + ${input}. 
       Revisa que sean los recuperados con la herramienta "profesionalesferreyra"`;
     }
@@ -311,7 +406,11 @@ router.post("/turnos/turno-mas-proximo", async (req, res) => {
   }
 });
 
-async function obtenerPrestaciones(IdCentroAtencion, IdServicio, IdProfesional) {
+async function obtenerPrestaciones(
+  IdCentroAtencion,
+  IdServicio,
+  IdProfesional
+) {
   const fromToken = "webhook"; // Token de acceso en los headers
   const apiUrl = `${process.env.API_BASE_URL}/api/Turnos/ObtenerPrestaciones`;
 
@@ -332,45 +431,53 @@ async function obtenerPrestaciones(IdCentroAtencion, IdServicio, IdProfesional) 
     );
     throw new Error("Error al obtener prestaciones");
   }
-};
+}
 
-async function obtenerPrimerosTurnos(IdCentroAtencion, IdServicio, IdProfesional, IdPrestacion, IdPersona, IdCobertura) {
-  const fromToken = "webhook"; // Token de acceso en los headers
-  const apiUrl = `${process.env.API_BASE_URL}/api/Turnos/ObtenerPrimerosTurnosWsp`;
-
-  // Construcción de params y body
-  const params = {
-    idPersona: IdPersona,
-    idPersonaRelacion: IdPersona,
-    idCentro: IdCentroAtencion,
-  };
-
-  const body = {
-    IdServicio: IdServicio,
-    IdsRecursos: [IdProfesional],
-    IdCobertura: IdCobertura,
-    IdPrestacion: IdPrestacion,
-  };
-
+async function obtenerPrimerosTurnos(
+  IdCentroAtencion,
+  IdServicio,
+  IdPrestacion,
+  IdPersona,
+  IdCobertura
+) {
   try {
+    ///api/Meta/ObtenerPrimerTurnos
+
+    const fromToken = "webhook"; // El token de acceso está en los headers
+    const apiUrl = `${process.env.API_BASE_URL}/api/Meta/ObtenerPrimerTurnos`;
+
+    //construccion del params
+    const params = {
+      idPersona: IdPersona,
+      idPersonaRelacion: IdPersona,
+      idCentrAtencion: IdCentroAtencion,
+      idServicio: IdServicio,
+      idCobertura: IdCobertura,
+      idPrestacion: IdPrestacion,
+    };
+
+    //construccion del body
+    const body = {};
+
     const response = await axios.post(apiUrl, body, {
       params: params,
       headers: { From: fromToken },
     });
 
-    // Mapea los turnos para el formato requerido
-    const turnos = response.data.Turnos.map((turno) => ({
-      IdTurno: turno.Id,
-      Fecha: turno.Fecha,
-      Profesional: turno.Medico,
-      IdProfesional: turno.IdRecurso,
-    }));
+    const data = response.data;
 
-    return turnos;
+    return data;
   } catch (error) {
-    console.error("Error al llamar a ObtenerPrimerosTurnos:", error);
-    throw new Error("Error al obtener los primeros turnos");
+    // Manejo de errores
+    console.error("Error al llamar a ObtenerPrimerosTurnos:");
+    // Verifica si el error viene con una respuesta del backend externo
+    const errorMessage =
+      error.response && error.response.data
+        ? error.response.data
+        : { mensaje: "Error desconocido al llamar a la API externa." };
+
+    throw error;
   }
-};
+}
 
 export default router;

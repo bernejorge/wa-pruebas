@@ -49,7 +49,8 @@ async function getMessages(startDate, endDate) {
     FROM 
       public.chat_message
     WHERE 
-      chat_message."createdDate" BETWEEN $1 AND $2
+      chat_message."createdDate" BETWEEN $1 AND $2 AND
+      chat_message."sessionId" like '%377253802146492%'
     GROUP BY 
       chat_message."sessionId"
     ORDER BY 
@@ -92,7 +93,7 @@ function saveMessagesToFile(data) {
    });
  }
 // Llamar la función
-getMessages('2024-11-05', '2024-11-06')
+getMessages('2024-11-09', '2024-11-10')
   .then(data => {
    saveMessagesToFile(data);
   })
