@@ -137,7 +137,8 @@ router.post("/turnos/obtener_primeros_turnos", async (req, res) => {
       Fecha: turno.Fecha,
       Profesional: turno.Medico,
       IdProfesional: turno.IdRecurso,
-    }));
+      IdPrestacion: IdPrestacion
+    })).sort((a, b) => new Date(a.Fecha) - new Date(b.Fecha));
 
     const data = response.data;
     data.Turnos = turnos; //mi mapeo
@@ -169,18 +170,64 @@ router.post("/turnos/obtener_primeros_turnos_x_servicio", async (req, res) => {
     if(IdPersona === 0 );
     if(IdCobertura === 0);
 
-    const datosHRF = await obtenerPrimerosTurnos(19, IdServicio, IdPrestacion, IdPersona, IdCobertura);
-
-    const datosAnexo = await obtenerPrimerosTurnos(32, IdServicio, IdPrestacion, IdPersona, IdCobertura);
-    
     const respuesta = {
       Exito: true,
-      TurnoDisponibles: []
+      Prestacion: "",
+      TurnoDisponibles: [],
+      mensaje: ""
     }
 
-    if (datosHRF.Turnos) respuesta.TurnoDisponibles.push(... datosHRF.Turnos)
-    if(datosAnexo.Turnos) respuesta.TurnoDisponibles.push(... datosAnexo.Turnos);
+    const errores = [];
+    let datosHRF = null;
+    let datosAnexo = null;
 
+   // Buscar los turnos del HRF
+   try {
+    datosHRF = await obtenerPrimerosTurnos(19, IdServicio, IdPrestacion, IdPersona, IdCobertura);
+    
+    if (datosHRF.Turnos && datosHRF.Turnos.length > 0) {
+      respuesta.TurnoDisponibles.push(...datosHRF.Turnos);
+      respuesta.Prestacion = datosHRF.Prestacion;
+    }
+  } catch (errorHRF) {
+    console.error("Error al obtener turnos de HRF:", errorHRF);
+    errores.push({
+      fuente: 'Error al buscar turnos en el Hospital Raul Angel Ferreyra',
+      error: errorHRF.message || 'Error desconocido',
+      detalles: errorHRF
+    });
+  }
+
+  // buscar los turnos del Anexo
+  try {
+    datosAnexo = await obtenerPrimerosTurnos(32, IdServicio, IdPrestacion, IdPersona, IdCobertura);
+    
+    if (datosAnexo.Turnos && datosAnexo.Turnos.length > 0) {
+      respuesta.TurnoDisponibles.push(...datosAnexo.Turnos);
+      respuesta.Prestacion = datosAnexo.Prestacion || respuesta.Prestacion;
+    }
+  } catch (errorAnexo) {
+    console.error("Error al obtener turnos de Anexo:", errorAnexo);
+    errores.push({
+      fuente: 'Error al buscar turnos en el Anexo Centro.',
+      error: errorAnexo.message || 'Error desconocido',
+      detalles: errorAnexo
+    });
+  }
+
+    // Si ambas llamadas fallaron, envio los errores
+    if (errores.length === 2) {
+      return res.status(500).json({
+        Exito: false,
+        Errores: errores
+      });
+    }
+
+    if (respuesta.TurnoDisponibles.length === 0) {
+      respuesta.mensaje = "No se encotraron turnos disponibles",
+      respuesta.Exito = true;
+      return res.status(200).json(respuesta);
+    }
     
     const  turnos = respuesta.TurnoDisponibles.map((turno) => ({
       IdTurno: turno.Id,
@@ -189,20 +236,24 @@ router.post("/turnos/obtener_primeros_turnos_x_servicio", async (req, res) => {
       IdProfesional: turno.IdRecurso,
       Especialidad: turno.Especialidad,
       Lugar: turno.Lugar,
-      IdCentroDeAtencion: turno.IdCentroDeAtencion
-    }));
+      IdCentroDeAtencion: turno.IdCentroDeAtencion,
+      IdPrestacion: IdPrestacion
+    })).sort((a, b) => new Date(a.Fecha) - new Date(b.Fecha));
     
     respuesta.TurnoDisponibles = turnos; //mi mapeo de turnos.
 
     res.json(respuesta);
   } catch (error) {
     // Manejo de errores
-    console.error("Error al llamar a ObtenerPrimerosTurnos:");
-    // Verifica si el error viene con una respuesta del backend externo
-    const errorMessage =
+    console.error("Error general al obtener turnos:", error);
+    
+    const errorMessage = 
       error.response && error.response.data
         ? error.response.data
-        : { mensaje: "Error desconocido al llamar a la API externa." };
+        : { 
+            mensaje: "Error desconocido al procesar los turnos", 
+            detalles: error.message 
+          };
 
     res.status(error.response ? error.response.status : 500).json(errorMessage);
   }
@@ -262,15 +313,17 @@ router.post("/turnos/anular_turno", async (req, res) => {
       idTurno: IdTurno
     };
 
-    //construccion del body
-    const body = {};
-
-    const response = await axios.post(apiUrl, body, {
-      params: params,
-      headers: { From: fromToken },
+    const response = await axios.get(apiUrl, {
+      params: params, // Parámetros enviados como parte de la URL
+      headers: { From: fromToken }, // Headers adicionales
     });
 
-    res.json(response.data);
+     // sepearo el objeto Turno
+     const { Turno, ...restoDeLaRespuesta } = response.data;
+
+     // Envio la respuesta sin el objeto Turno
+     res.json(restoDeLaRespuesta);
+
   } catch (error) {
     console.error("Error al llamar a Turnos/AnularTurnos: ", error);
     // Verifica si el error viene con una respuesta del backend externo
