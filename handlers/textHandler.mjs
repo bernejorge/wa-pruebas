@@ -92,7 +92,7 @@ const handleTextMessage = async (message, phone_number_id) => {
         };
 
         // Llamar a la API de Flowise con el texto del mensaje
-        const flowiseResponse = await queryWithRetry(requestData, phone_number_id, 3, 3000);
+        const flowiseResponse = await queryWithRetry(requestData, phone_number_id, 3, 10000);
 
         console.log('Respuesta de Flowise:', flowiseResponse.text);
 
