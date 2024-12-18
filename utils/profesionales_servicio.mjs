@@ -100,6 +100,29 @@ export const getGroupByCentro = async (inputText, tableName, limit = 40) => {
   }
 };
 
+export const getServicios = async (inputText, tableName, limit = 40) => {
+  try {
+    // Llamar a searchByEmbedding con el texto de entrada
+    const results = await searchByEmbedding(inputText, tableName, limit);
+
+    // Objeto para agrupar los datos por CentroDeAtencion
+    const groupedData = [];
+
+    results.forEach((row) => {
+      // Parsear el campo pageContent
+      const parsedContent = parsePageContent(row.pageContent);
+
+      groupedData.push(parsedContent);
+    });
+    
+    return groupedData;
+  } catch (error) {
+    console.error("Error al obtener y agrupar los datos:", error);
+    throw error;
+  }
+};
+
+
 // Función para parsear el campo pageContent
 const parsePageContent = (pageContent) => {
   const lines = pageContent.split("\n");

@@ -1,7 +1,7 @@
 import express from "express";
 import messageHandler from "../handlers/messageHandler.mjs";
 import handleMessageStatus from "../handlers/statusHandler.mjs";
-import { getGroupByCentro } from "./../utils/profesionales_servicio.mjs";
+import { getGroupByCentro, getServicios } from "./../utils/profesionales_servicio.mjs";
 import axios from "axios";
 
 const router = express.Router();
@@ -120,5 +120,23 @@ router.get("/obtenerPreparaciones", async (req, res) => {
     }
   }
 });
+
+router.get("/buscar_servicio", async (req, res) =>{
+  try {
+    const inputText = req.query.inputText;
+
+    if (!inputText) {
+      return res
+        .status(400)
+        .json({ error: 'El parámetro "inputText" es requerido.' });
+    }
+
+    //limito la busqueda a los 5 resultados mas parecidos
+    const data = await getServicios(inputText, "servicios_hrf",4);
+    res.json(data);
+  } catch (error) {
+    
+  }
+})
 
 export default router;
