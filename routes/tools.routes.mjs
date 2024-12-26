@@ -1,7 +1,7 @@
 import express from "express";
 import messageHandler from "../handlers/messageHandler.mjs";
 import handleMessageStatus from "../handlers/statusHandler.mjs";
-import { getGroupByCentro, getServicios } from "./../utils/profesionales_servicio.mjs";
+import { getGroupByCentro, getServicios, recuperarInfo } from "./../utils/profesionales_servicio.mjs";
 import axios from "axios";
 
 const router = express.Router();
@@ -138,5 +138,33 @@ router.get("/buscar_servicio", async (req, res) =>{
     
   }
 })
+
+router.get("/rag", async (req, res)=> {
+  try {
+    const inputText = req.query.inputText;
+    const tableName = req.query.tableName;
+    const topk = req.query.topk;
+    if (!inputText ||!tableName) {
+      return res
+        .status(400)
+        .json({ error: 'El parámetro "inputText" y "tableName" es requerido.' });
+    }
+
+    //limito la busqueda a los 5 resultados mas parecidos
+    const data = await recuperarInfo(inputText, tableName,topk);
+    res.json(data);
+  } catch (error) {
+     // Verifica si el error tiene una respuesta del servidor
+     if (error.response && error.response.data) {
+      // Extrae el mensaje de error del servidor
+      const serverMessage = error.response.data.Mensaje || "Error desconocido del servidor";
+      res.status(error.response.status).json({ error: serverMessage });
+    } else {
+      // Manejo de errores sin respuesta del servidor
+      res.status(500).json({ error: "Error al recuperar la informacion." });
+    }
+  }
+})
+
 
 export default router;

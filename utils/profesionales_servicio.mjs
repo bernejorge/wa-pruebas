@@ -122,6 +122,28 @@ export const getServicios = async (inputText, tableName, limit = 40) => {
   }
 };
 
+export const recuperarInfo = async (inputText, tableName, limit = 4) => {
+  try {
+    // Llamar a searchByEmbedding con el texto de entrada
+    const results = await searchByEmbedding(inputText, tableName, limit);
+
+    //arreglo con regitros recuperados
+    const groupedData = [];
+
+    results.forEach((row) => {
+      // Parsear el campo pageContent
+      const parsedContent = row.pageContent;
+
+      groupedData.push(parsedContent);
+    });
+    
+    return groupedData;
+  } catch (error) {
+    console.error("Error al obtener y agrupar los datos:", error);
+    throw error;
+  }
+};
+
 
 // Función para parsear el campo pageContent
 const parsePageContent = (pageContent) => {
@@ -136,4 +158,47 @@ const parsePageContent = (pageContent) => {
   });
 
   return data;
+};
+
+export const recuperarUltimoMensaje = async (sessionId) => {
+  try {
+    const query = `
+          SELECT 
+            "sessionId", 
+            "createdDate" AT TIME ZONE 'UTC' AT TIME ZONE 'America/Argentina/Buenos_Aires' AS "createdDateLocal", 
+            id, 
+            role, 
+            chatflowid, 
+            content, 
+            "sourceDocuments",  
+            "chatType", 
+            "chatId", 
+            "memoryType", 
+            "usedTools", 
+            "fileAnnotations", 
+            "fileUploads", 
+            "leadEmail", 
+            "agentReasoning", 
+            action, 
+            artifacts, 
+            "followUpPrompts"
+          FROM public.chat_message
+          WHERE "sessionId" = '${sessionId}'
+          ORDER BY "createdDate" DESC
+          LIMIT 1;
+`;
+
+    // Ejecutar la consulta pasando el sessionId como parámetro
+    const result = await pool.query(query);
+
+    // Verificar si hay resultados
+    if (result.rows.length > 0) {
+      return result.rows[0]; // Devolver el último mensaje
+    } else {
+      return null; // Si no hay mensajes para el sessionId
+    }
+  } catch (error) {
+    console.error("Error al recuperar el último mensaje de la sesión:", error);
+    throw error;
+  }
 };

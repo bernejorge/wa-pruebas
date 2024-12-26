@@ -33,7 +33,7 @@ router.get("/turnos/validar-dni", async (req, res) => {
       const coberturas = response.data.Coberturas.map((cobertura) => ({
         IdCobertura: cobertura.Id,
         nombre: cobertura.NombreFinanciador,
-      }));
+      })).filter((cobertura) => cobertura.nombre.toLowerCase().includes("apross") );
 
       data = {
         exito: true,

@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
 import axios from 'axios'; 
-import {getFlowiseToken, getFlowiseURL} from './../utils/flowiseApi.mjs'
+import {getFlowiseToken, getFlowiseURL, checkAntiguedadUltimoMensaje} from './../utils/flowiseApi.mjs'
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -14,16 +14,31 @@ async function query(data, phone_number_id) {
     const flowiseApiUrl = getFlowiseURL(phone_number_id);
     const flowiseAuthToken = getFlowiseToken(phone_number_id);
 
-    const response = await fetch(flowiseApiUrl, {
-        headers: {
-            Authorization: 'Bearer ' + flowiseAuthToken,
-            "Content-Type": "application/json"
-        },
-        method: "POST",
-        body: JSON.stringify(data)
-    });
-    const result = await response.json();
-    return result;
+    try {
+        const response = await axios.post(flowiseApiUrl, data, {
+            headers: {
+                Authorization: `Bearer ${flowiseAuthToken}`,
+                "Content-Type": "application/json"
+            }
+        });
+
+        return response.data;
+    } catch (error) {
+        // Manejo de errores
+        if (error.response) {
+            // El servidor respondió con un código de estado fuera del rango 2xx
+            console.error('Error en la respuesta del servidor:', error.response.data);
+            console.error('Código de estado:', error.response.status);
+            console.error('Encabezados de respuesta:', error.response.headers);
+        } else if (error.request) {
+            // La solicitud fue hecha pero no se recibió respuesta
+            console.error('No se recibió respuesta del servidor:', error.request);
+        } else {
+            // Algo ocurrió al configurar la solicitud
+            console.error('Error al configurar la solicitud:', error.message);
+        }
+        throw error; // Opcional: vuelve a lanzar el error después de manejarlo
+    }
 }
 
 async function queryWithRetry(data, phone_number_id, maxRetries = 3, retryDelay = 5000) {
@@ -84,15 +99,24 @@ const handleTextMessage = async (message, phone_number_id) => {
 
     try {
         // Preparar el JSON con el formato correcto para la API de Flowise
+        const sessionId = phone_number_id + "/" + from;
         const requestData = { 
             question: text,
             overrideConfig:{
-                sessionId: phone_number_id + "/" + from
+                sessionId: sessionId
             }
         };
 
+        try {
+             //TODO: Antes de llamar a flowise comprobar la inactividad de la session y borrar si la sesion es muy vieja1
+        const rtaAntiguedad = await checkAntiguedadUltimoMensaje(sessionId, 30);
+
+        } catch (error) {
+            
+        }
+       
         // Llamar a la API de Flowise con el texto del mensaje
-        const flowiseResponse = await queryWithRetry(requestData, phone_number_id, 3, 10000);
+        const flowiseResponse = await query(requestData, phone_number_id);
 
         console.log('Respuesta de Flowise:', flowiseResponse.text);
 
@@ -102,7 +126,7 @@ const handleTextMessage = async (message, phone_number_id) => {
             to: from,
             type: "text",
             text: {
-                body: flowiseResponse.text || "No se pudo obtener una respuesta de Flowise"
+                body: flowiseResponse.text || "Lo sentimos, no pudimos procesar tu mensaje en este momento. Por favor, inténtalo nuevamente en unos minutos."
             }
         };
 
