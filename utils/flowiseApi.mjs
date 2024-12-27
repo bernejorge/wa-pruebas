@@ -1,5 +1,6 @@
 import fetch from "node-fetch"; // Asegúrate de que 'node-fetch' esté instalado
 import axios from 'axios';
+import { toZonedTime } from 'date-fns-tz';
 import { recuperarUltimoMensaje } from './profesionales_servicio.mjs'
 
 export const queryFlowise = async (data, phone_number_id) => {
@@ -39,30 +40,39 @@ export const getFlowiseToken = (phone_number_id) => {
     return flowiseAuthToken;
 }
 
+/**
+ * Función para verificar la antigüedad del último mensaje en una sesión.
+ * @param {string} sessionId - ID de la sesión.
+ * @param {number} tiempoLimiteMinutos - Tiempo límite en minutos para considerar un mensaje como viejo.
+ * @returns {Object} Resultado de la operación.
+ */
 export const checkUltimoMensajeDeSesion = async (sessionId) => {
   try {
     // Recuperar el último mensaje de la sesión
     const ultimoMensaje = await recuperarUltimoMensaje(sessionId);
 
     if (!ultimoMensaje) {
-      //console.log("No se encontró ningún mensaje para esta sesión.");
-      return {mensaje: null}; // No hay mensajes para este sessionId
+      console.log("No se encontró ningún mensaje para esta sesión.");
+      return { mensaje: null }; // No hay mensajes para este sessionId
     }
 
-    // Convertir la fecha del mensaje (en UTC) a la zona horaria UTM-3
-    const createdDateUTC = new Date(ultimoMensaje.createdDateLocal); // Convertir a objeto Date
-    const createdDateLocal = new Date(createdDateUTC.getTime() ); // Ajustar a UTM-3
+    // Definir la zona horaria de Argentina
+    const timeZone = 'America/Argentina/Buenos_Aires'; // Zona horaria para Argentina
 
-    // Obtener la fecha actual en UTM-3
+    // Convertir la fecha del mensaje a la zona horaria de Argentina
+    const createdDateUTC = new Date(ultimoMensaje.createdDateLocal); // Asumiendo que createdDateLocal está en UTC
+    const createdDateLocal = toZonedTime(createdDateUTC, timeZone);
+
+    // Obtener la fecha actual en la zona horaria de Argentina
     const nowUTC = new Date();
-    const nowLocal = new Date(nowUTC.getTime() );
+    const nowLocal = toZonedTime(nowUTC, timeZone);
 
     // Calcular la antigüedad del mensaje en minutos
     const antiguedadEnMinutos = Math.floor((nowLocal - createdDateLocal) / (1000 * 60));
 
-    // Log de información
-    
-    console.log(`Fecha del mensaje (UTM-3):`, createdDateLocal);
+    // Logs de información
+    console.log(`Fecha del mensaje (Argentina):`, createdDateLocal);
+    console.log(`Fecha actual (Argentina):`, nowLocal); // Log de la fecha actual
     console.log(`Antigüedad en minutos: ${antiguedadEnMinutos}`);
 
     // Devolver la antigüedad y el mensaje
