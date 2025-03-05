@@ -60,8 +60,8 @@ export const checkUltimoMensajeDeSesion = async (sessionId) => {
     const timeZone = 'America/Argentina/Buenos_Aires'; // Zona horaria para Argentina
 
     // Convertir la fecha del mensaje a la zona horaria de Argentina
-    const createdDateUTC = new Date(ultimoMensaje.createdDateLocal); // Asumiendo que createdDateLocal está en UTC
-    const createdDateLocal = toZonedTime(createdDateUTC, timeZone);
+    const createdDateUTC = new Date(ultimoMensaje.createdDateLocal); 
+    const createdDateLocal = createdDateUTC; //toZonedTime(createdDateUTC, timeZone);
 
     // Obtener la fecha actual en la zona horaria de Argentina
     const nowUTC = new Date();

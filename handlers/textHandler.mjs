@@ -1,5 +1,6 @@
 import fetch from 'node-fetch';
 import axios from 'axios'; 
+import axiosInstance from './axios-pool.mjs';
 import {getFlowiseToken, getFlowiseURL, checkAntiguedadUltimoMensaje} from './../utils/flowiseApi.mjs'
 import dotenv from 'dotenv';
 
@@ -15,7 +16,7 @@ async function query(data, phone_number_id) {
     const flowiseAuthToken = getFlowiseToken(phone_number_id);
 
     try {
-        const response = await axios.post(flowiseApiUrl, data, {
+        const response = await axiosInstance.post(flowiseApiUrl, data, {
             headers: {
                 Authorization: `Bearer ${flowiseAuthToken}`,
                 "Content-Type": "application/json"
