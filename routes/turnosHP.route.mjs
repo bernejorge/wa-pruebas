@@ -64,6 +64,81 @@ router.get("/turnoshp/validar-dni", async (req, res) => {
   }
 });
 
+router.get("/turnoshp/obtener-centros-atencion", async (req, res) => {
+  try {
+    //TODO: llamar a => curl -X POST "http://innova.testing.hospitalprivado.com.ar/Comun/IntegracionMETA/api/CentrosDeAtencion/Obtener" -H "accept: text/plain" -H "From: tips" -H "Content-Type: application/json-patch+json" -d "{\"IdsCentrosDeAtencion\":[0],\"IdPersonaRelacion\":0}"
+    const fromToken = "webhook"; // El token de acceso está en los headers
+    const apiUrl = `${process.env.API_BASE_URL}/api/CentrosDeAtencion/Obtener`;
+
+    const mockCentros = [
+      { IdCentroAtencion: 14, nombre: "Central", domicilio: "Av. Naciones Unidas 346, Córdoba", telefono: "0351-4688200" },
+      { IdCentroAtencion: 15, nombre: "Patio Olmos", domicilio: "Obispo Trejo 320, Córdoba", telefono: "0351-5697600" },
+      { IdCentroAtencion: 16, nombre: "Hiper Libertad", domicilio: "Hiper Libertad Rodriguez del Busto - Fray Luis Beltrán y Cardeñosa, Poeta Lugones - Córdoba", telefono: "0351-4779500" },
+      { IdCentroAtencion: 17, nombre: "Cerro", domicilio: "Luis de Tejeda 4625. Córdoba. CP 5000.", telefono: "0351-4118336" },
+      { IdCentroAtencion: 18, nombre: "Villa Allende", domicilio: "Río de Janeiro 1725 (esq. Mendoza) - Villa Allende", telefono: "0351-5697610" },
+      { IdCentroAtencion: 19, nombre: "Hospital Raúl Ángel Ferreyra", domicilio: "Av. Pablo Ricchieri 2200, Córdoba", telefono: "0351-4476500" },
+      { IdCentroAtencion: 20, nombre: "Anexo Jardin", domicilio: "Av. Richieri 3176", telefono: "351-4865557" },
+      { IdCentroAtencion: 21, nombre: "Centro Médico San Vicente", domicilio: "Sargento Cabral 1385. Córdoba", telefono: "0351-4558041" },
+      { IdCentroAtencion: 22, nombre: "Cañada Honda", domicilio: "", telefono: "" },
+      { IdCentroAtencion: 23, nombre: "Centro Rivadavia", domicilio: "Rivadavia 150 1er piso", telefono: "" },
+      { IdCentroAtencion: 24, nombre: "Ctro Perif. Villa Maria", domicilio: "", telefono: "" },
+      { IdCentroAtencion: 25, nombre: "Centro de Atención Calazans", domicilio: "Calazans", telefono: "" },
+      { IdCentroAtencion: 26, nombre: "Velez Sarsfield", domicilio: "Velez Sarsfield 478, Córdoba", telefono: "" },
+      { IdCentroAtencion: 27, nombre: "PRUEBA", domicilio: "Naciones Unidas 346, Bº Parque Vélez Sarsfield, Córdoba", telefono: "0351-4688200" },
+      { IdCentroAtencion: 28, nombre: "Ctro Perif. Rogelio Martínez", domicilio: "Rogelio Martínez", telefono: "" },
+      { IdCentroAtencion: 29, nombre: "Hospital Privado Nuñez", domicilio: "Av. Rafael Nuñez 5229 - Córdoba", telefono: "" },
+      { IdCentroAtencion: 30, nombre: "Ctro Perif. Recta Martinolli", domicilio: "Recta Martinolli", telefono: "" },
+      { IdCentroAtencion: 31, nombre: "Ctro Perif. Jardín Espinosa", domicilio: "Jardín Espinosa", telefono: "" },
+      { IdCentroAtencion: 32, nombre: "HRF Anexo Centro", domicilio: "Santa Rosa 770, Córdoba", telefono: "351-5711020" },
+      { IdCentroAtencion: 33, nombre: "Ctro Perif. Finochietto", domicilio: "Enrique Finocchietto 460", telefono: "" },
+      { IdCentroAtencion: 34, nombre: "Centro Rehabilitación SDE", domicilio: "Santiago del Estero 333, Córdoba", telefono: "351-5697640" },
+      { IdCentroAtencion: 35, nombre: "Ctro Perif. SDE", domicilio: "Santiago del Estero 333, Córdoba", telefono: "" },
+      { IdCentroAtencion: 36, nombre: "Cent Perif. Recta Martinolli", domicilio: "recta", telefono: "035153035565" }
+    ];
+
+    res.json({
+      exito: true,
+      Centros: mockCentros
+    });
+
+  } catch (error) {
+    console.error("Error al llamar a la API externa /api/CentrosDeAtencion/Obtener:", error);
+    
+    const errorMessage =
+      error.response && error.response.data
+        ? error.response.data
+        : { mensaje: "Error desconocido al llamar a la API externa." };
+
+    res.status(error.response ? error.response.status : 500).json(errorMessage);
+  }
+});
+
+router.get("turnoshp/obtener-servicios-centros", async (req, res)=>{
+   try {
+      const IdRecurso = req.query.IdProfesional;
+      const fromToken = "webhook"; // El token de acceso está en los headers
+      const apiUrl = `${process.env.API_BASE_URL}/api/Meta/ObtenerCentroServicios`; //completar la url con la que haga el seba
+      
+      const response = await axios.get(apiUrl, {
+         params: { IdRecurso: IdRecurso }, // Parámetros enviados como parte de la URL
+         headers: { From: fromToken }, // Headers adicionales
+      });
+
+      res.json(response); 
+
+   } catch (error) {
+      console.error("Error al llamar a la API externa /Meta/ObtenerCentroServicios:", error) //completar la url;
+
+    // Verifica si el error viene con una respuesta del backend
+    const errorMessage =
+      error.response && error.response.data
+        ? error.response.data
+        : { mensaje: "Error desconocido al llamar a la API externa." };
+
+    res.status(error.response ? error.response.status : 500).json(errorMessage);
+   }
+});
+
 router.post("/turnoshp/obtener-prestaciones", async (req, res) => {
   try {
     ///api/Meta/ObtenerPrestaciones
@@ -137,7 +212,7 @@ router.post("/turnoshp/obtener_primeros_turnos", async (req, res) => {
       Fecha: turno.Fecha,
       Profesional: turno.Medico,
       IdProfesional: turno.IdRecurso,
-      IdPrestacion: IdPrestacion
+      IdPrestacion: IdPrestacion,
     })).sort((a, b) => new Date(a.Fecha) - new Date(b.Fecha));
 
     const data = response.data;
@@ -157,107 +232,119 @@ router.post("/turnoshp/obtener_primeros_turnos", async (req, res) => {
   }
 });
 
-router.post("/turnoshp/obtener_primeros_turnos_x_servicio", async (req, res) => {
-  try {
-    ///api/Meta/ObtenerPrimerTurnos
-    const {
-      IdServicio,
-      IdPrestacion,
-      IdPersona,
-      IdCobertura,
-    } = req.body;
+router.post(
+  "/turnoshp/obtener_primeros_turnos_x_servicio",
+  async (req, res) => {
+    try {
+      ///api/Meta/ObtenerPrimerTurnos
+      const { IdServicio, IdPrestacion, IdPersona, IdCobertura } = req.body;
 
-    if(IdPersona === 0 );
-    if(IdCobertura === 0);
+      if (IdPersona === 0);
+      if (IdCobertura === 0);
 
-    const respuesta = {
-      Exito: true,
-      Prestacion: "",
-      TurnoDisponibles: [],
-      mensaje: ""
+      const respuesta = {
+        Exito: true,
+        Prestacion: "",
+        TurnoDisponibles: [],
+        mensaje: "",
+      };
+
+      const errores = [];
+      let datosHRF = null;
+      let datosAnexo = null;
+
+      // Buscar los turnos del HRF
+      try {
+        datosHRF = await obtenerPrimerosTurnos(
+          19,
+          IdServicio,
+          IdPrestacion,
+          IdPersona,
+          IdCobertura
+        );
+
+        if (datosHRF.Turnos && datosHRF.Turnos.length > 0) {
+          respuesta.TurnoDisponibles.push(...datosHRF.Turnos);
+          respuesta.Prestacion = datosHRF.Prestacion;
+        }
+      } catch (errorHRF) {
+        console.error("Error al obtener turnos de HRF:", errorHRF);
+        errores.push({
+          fuente: "Error al buscar turnos en el Hospital Raul Angel Ferreyra",
+          error: errorHRF.message || "Error desconocido",
+          detalles: errorHRF,
+        });
+      }
+
+      // buscar los turnos del Anexo
+      try {
+        datosAnexo = await obtenerPrimerosTurnos(
+          32,
+          IdServicio,
+          IdPrestacion,
+          IdPersona,
+          IdCobertura
+        );
+
+        if (datosAnexo.Turnos && datosAnexo.Turnos.length > 0) {
+          respuesta.TurnoDisponibles.push(...datosAnexo.Turnos);
+          respuesta.Prestacion = datosAnexo.Prestacion || respuesta.Prestacion;
+        }
+      } catch (errorAnexo) {
+        console.error("Error al obtener turnos de Anexo:", errorAnexo);
+        errores.push({
+          fuente: "Error al buscar turnos en el Anexo Centro.",
+          error: errorAnexo.message || "Error desconocido",
+          detalles: errorAnexo,
+        });
+      }
+
+      // Si ambas llamadas fallaron, envio los errores
+      if (errores.length === 2) {
+        return res.status(500).json({
+          Exito: false,
+          Errores: errores,
+        });
+      }
+
+      if (respuesta.TurnoDisponibles.length === 0) {
+        (respuesta.mensaje = "No se encotraron turnos disponibles"),
+          (respuesta.Exito = true);
+        return res.status(200).json(respuesta);
+      }
+
+      const turnos = respuesta.TurnoDisponibles.map((turno) => ({
+        IdTurno: turno.Id,
+        Fecha: turno.Fecha,
+        Profesional: turno.Medico,
+        IdProfesional: turno.IdRecurso,
+        Especialidad: turno.Especialidad,
+        Lugar: turno.Lugar,
+        IdCentroDeAtencion: turno.IdCentroDeAtencion,
+        IdPrestacion: IdPrestacion,
+      })).sort((a, b) => new Date(a.Fecha) - new Date(b.Fecha));
+
+      respuesta.TurnoDisponibles = turnos; //mi mapeo de turnos.
+
+      res.json(respuesta);
+    } catch (error) {
+      // Manejo de errores
+      console.error("Error general al obtener turnos:", error);
+
+      const errorMessage =
+        error.response && error.response.data
+          ? error.response.data
+          : {
+              mensaje: "Error desconocido al procesar los turnos",
+              detalles: error.message,
+            };
+
+      res
+        .status(error.response ? error.response.status : 500)
+        .json(errorMessage);
     }
-
-    const errores = [];
-    let datosHRF = null;
-    let datosAnexo = null;
-
-   // Buscar los turnos del HRF
-   try {
-    datosHRF = await obtenerPrimerosTurnos(19, IdServicio, IdPrestacion, IdPersona, IdCobertura);
-    
-    if (datosHRF.Turnos && datosHRF.Turnos.length > 0) {
-      respuesta.TurnoDisponibles.push(...datosHRF.Turnos);
-      respuesta.Prestacion = datosHRF.Prestacion;
-    }
-  } catch (errorHRF) {
-    console.error("Error al obtener turnos de HRF:", errorHRF);
-    errores.push({
-      fuente: 'Error al buscar turnos en el Hospital Raul Angel Ferreyra',
-      error: errorHRF.message || 'Error desconocido',
-      detalles: errorHRF
-    });
   }
-
-  // buscar los turnos del Anexo
-  try {
-    datosAnexo = await obtenerPrimerosTurnos(32, IdServicio, IdPrestacion, IdPersona, IdCobertura);
-    
-    if (datosAnexo.Turnos && datosAnexo.Turnos.length > 0) {
-      respuesta.TurnoDisponibles.push(...datosAnexo.Turnos);
-      respuesta.Prestacion = datosAnexo.Prestacion || respuesta.Prestacion;
-    }
-  } catch (errorAnexo) {
-    console.error("Error al obtener turnos de Anexo:", errorAnexo);
-    errores.push({
-      fuente: 'Error al buscar turnos en el Anexo Centro.',
-      error: errorAnexo.message || 'Error desconocido',
-      detalles: errorAnexo
-    });
-  }
-
-    // Si ambas llamadas fallaron, envio los errores
-    if (errores.length === 2) {
-      return res.status(500).json({
-        Exito: false,
-        Errores: errores
-      });
-    }
-
-    if (respuesta.TurnoDisponibles.length === 0) {
-      respuesta.mensaje = "No se encotraron turnos disponibles",
-      respuesta.Exito = true;
-      return res.status(200).json(respuesta);
-    }
-    
-    const  turnos = respuesta.TurnoDisponibles.map((turno) => ({
-      IdTurno: turno.Id,
-      Fecha: turno.Fecha,
-      Profesional: turno.Medico,
-      IdProfesional: turno.IdRecurso,
-      Especialidad: turno.Especialidad,
-      Lugar: turno.Lugar,
-      IdCentroDeAtencion: turno.IdCentroDeAtencion,
-      IdPrestacion: IdPrestacion
-    })).sort((a, b) => new Date(a.Fecha) - new Date(b.Fecha));
-    
-    respuesta.TurnoDisponibles = turnos; //mi mapeo de turnos.
-
-    res.json(respuesta);
-  } catch (error) {
-    // Manejo de errores
-    console.error("Error general al obtener turnos:", error);
-    
-    const errorMessage = 
-      error.response && error.response.data
-        ? error.response.data
-        : { 
-            mensaje: "Error desconocido al procesar los turnos", 
-            detalles: error.message 
-          };
-
-    res.status(error.response ? error.response.status : 500).json(errorMessage);
-  }
-});
+);
 
 router.post("/turnoshp/asignar", async (req, res) => {
   try {
@@ -302,7 +389,7 @@ router.post("/turnoshp/anular_turno", async (req, res) => {
   try {
     ///api/Meta/AnularTurno
 
-    const { IdPersona, IdTurno} = req.body;
+    const { IdPersona, IdTurno } = req.body;
     const email = "";
     const fromToken = "webhook"; // El token de acceso está en los headers
     const apiUrl = `${process.env.API_BASE_URL}/api/Meta/AnularTurno`;
@@ -310,7 +397,7 @@ router.post("/turnoshp/anular_turno", async (req, res) => {
     //construccion del params
     const params = {
       idPersona: IdPersona,
-      idTurno: IdTurno
+      idTurno: IdTurno,
     };
 
     const response = await axios.get(apiUrl, {
@@ -318,12 +405,11 @@ router.post("/turnoshp/anular_turno", async (req, res) => {
       headers: { From: fromToken }, // Headers adicionales
     });
 
-     // sepearo el objeto Turno
-     const { Turno, ...restoDeLaRespuesta } = response.data;
+    // sepearo el objeto Turno
+    const { Turno, ...restoDeLaRespuesta } = response.data;
 
-     // Envio la respuesta sin el objeto Turno
-     res.json(restoDeLaRespuesta);
-
+    // Envio la respuesta sin el objeto Turno
+    res.json(restoDeLaRespuesta);
   } catch (error) {
     console.error("Error al llamar a Turnos/AnularTurnos: ", error);
     // Verifica si el error viene con una respuesta del backend externo
