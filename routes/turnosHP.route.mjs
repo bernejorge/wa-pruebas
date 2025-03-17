@@ -113,7 +113,7 @@ router.get("/turnoshp/obtener-centros-atencion", async (req, res) => {
   }
 });
 
-router.get("turnoshp/obtener-servicios-centros", async (req, res)=>{
+router.get("/turnoshp/obtener-servicios-centros", async (req, res)=>{
    try {
       const IdRecurso = req.query.IdProfesional;
       const fromToken = "webhook"; // El token de acceso está en los headers
@@ -124,7 +124,13 @@ router.get("turnoshp/obtener-servicios-centros", async (req, res)=>{
          headers: { From: fromToken }, // Headers adicionales
       });
 
-      res.json(response); 
+      const filteredCentros = response.data.ListaCentroAtencionServicio.filter(
+        item => item.IdCentroAtencion !== 32 && item.IdCentroAtencion !== 19
+      );
+      
+      response.data.ListaCentroAtencionServicio = filteredCentros;
+
+      res.json(response.data); 
 
    } catch (error) {
       console.error("Error al llamar a la API externa /Meta/ObtenerCentroServicios:", error) //completar la url;
@@ -232,88 +238,23 @@ router.post("/turnoshp/obtener_primeros_turnos", async (req, res) => {
   }
 });
 
-router.post(
-  "/turnoshp/obtener_primeros_turnos_x_servicio",
-  async (req, res) => {
+router.post("/turnoshp/obtener_primeros_turnos_x_servicio", async (req, res) => {
     try {
       ///api/Meta/ObtenerPrimerTurnos
-      const { IdServicio, IdPrestacion, IdPersona, IdCobertura } = req.body;
+      const { IdCentro, IdServicio, IdPrestacion, IdPersona, IdCobertura } = req.body;
 
       if (IdPersona === 0);
       if (IdCobertura === 0);
 
-      const respuesta = {
-        Exito: true,
-        Prestacion: "",
-        TurnoDisponibles: [],
-        mensaje: "",
-      };
+      const respuesta =  await obtenerPrimerosTurnos(
+        IdCentro,
+        IdServicio,
+        IdPrestacion,
+        IdPersona,
+        IdCobertura
+      );
 
-      const errores = [];
-      let datosHRF = null;
-      let datosAnexo = null;
-
-      // Buscar los turnos del HRF
-      try {
-        datosHRF = await obtenerPrimerosTurnos(
-          19,
-          IdServicio,
-          IdPrestacion,
-          IdPersona,
-          IdCobertura
-        );
-
-        if (datosHRF.Turnos && datosHRF.Turnos.length > 0) {
-          respuesta.TurnoDisponibles.push(...datosHRF.Turnos);
-          respuesta.Prestacion = datosHRF.Prestacion;
-        }
-      } catch (errorHRF) {
-        console.error("Error al obtener turnos de HRF:", errorHRF);
-        errores.push({
-          fuente: "Error al buscar turnos en el Hospital Raul Angel Ferreyra",
-          error: errorHRF.message || "Error desconocido",
-          detalles: errorHRF,
-        });
-      }
-
-      // buscar los turnos del Anexo
-      try {
-        datosAnexo = await obtenerPrimerosTurnos(
-          32,
-          IdServicio,
-          IdPrestacion,
-          IdPersona,
-          IdCobertura
-        );
-
-        if (datosAnexo.Turnos && datosAnexo.Turnos.length > 0) {
-          respuesta.TurnoDisponibles.push(...datosAnexo.Turnos);
-          respuesta.Prestacion = datosAnexo.Prestacion || respuesta.Prestacion;
-        }
-      } catch (errorAnexo) {
-        console.error("Error al obtener turnos de Anexo:", errorAnexo);
-        errores.push({
-          fuente: "Error al buscar turnos en el Anexo Centro.",
-          error: errorAnexo.message || "Error desconocido",
-          detalles: errorAnexo,
-        });
-      }
-
-      // Si ambas llamadas fallaron, envio los errores
-      if (errores.length === 2) {
-        return res.status(500).json({
-          Exito: false,
-          Errores: errores,
-        });
-      }
-
-      if (respuesta.TurnoDisponibles.length === 0) {
-        (respuesta.mensaje = "No se encotraron turnos disponibles"),
-          (respuesta.Exito = true);
-        return res.status(200).json(respuesta);
-      }
-
-      const turnos = respuesta.TurnoDisponibles.map((turno) => ({
+      const turnos = respuesta.Turnos.map((turno) => ({
         IdTurno: turno.Id,
         Fecha: turno.Fecha,
         Profesional: turno.Medico,
@@ -324,7 +265,7 @@ router.post(
         IdPrestacion: IdPrestacion,
       })).sort((a, b) => new Date(a.Fecha) - new Date(b.Fecha));
 
-      respuesta.TurnoDisponibles = turnos; //mi mapeo de turnos.
+      respuesta.Turnos = turnos; //mi mapeo de turnos.
 
       res.json(respuesta);
     } catch (error) {

@@ -1,7 +1,7 @@
 import express from "express";
 import messageHandler from "../handlers/messageHandler.mjs";
 import handleMessageStatus from "../handlers/statusHandler.mjs";
-import { getGroupByCentro, getServicios, recuperarInfo } from "./../utils/profesionales_servicio.mjs";
+import { getGroupByCentro, getServicios, recuperarInfo, getGroupByProfesional } from "./../utils/profesionales_servicio.mjs";
 import axios from "axios";
 
 const router = express.Router();
@@ -79,7 +79,7 @@ router.get("/getByProfesionalNameHP", async (req, res) => {
     }
 
     //limito la busqueda a los 5 resultados mas parecidos
-    const data = await getGroupByCentro(inputText, "profesionales_servicio_centro_hp0637",5);
+    const data = await getGroupByProfesional(inputText, "profesionales_servicio_centro_hp0637",5);
     res.json(data);
   } catch (error) {
     console.error("Error en la ruta /getGroupByCentro:", error);

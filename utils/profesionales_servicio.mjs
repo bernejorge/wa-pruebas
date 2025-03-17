@@ -46,6 +46,39 @@ export const searchByEmbedding = async (inputText, tableName, limit = 40) => {
   }
 };
 
+export const getGroupByProfesional = async (inputText, tableName, limit = 40) => {
+  try {
+    // Llamar a searchByEmbedding con el texto de entrada
+    const results = await searchByEmbedding(inputText, tableName, limit);
+
+    // Utilizar un Set para eliminar duplicados
+    const profesionalSet = new Set();
+    const profesionales = [];
+
+    results.forEach((row) => {
+      // Parsear el campo pageContent
+      const parsedContent = parsePageContent(row.pageContent);
+      const { IdProfesional, Profesional } = parsedContent;
+      
+      // Generar una clave única para cada profesional
+      const key = `${IdProfesional}-${Profesional}`;
+      if (!profesionalSet.has(key)) {
+        profesionalSet.add(key);
+        profesionales.push({
+          IdProfesional: Number(IdProfesional),
+          Profesional,
+        });
+      }
+    });
+
+    return profesionales;
+  } catch (error) {
+    console.error("Error al obtener y agrupar los datos por profesional:", error);
+    throw error;
+  }
+};
+
+
 export const getGroupByCentro = async (inputText, tableName, limit = 40) => {
   try {
     // Llamar a searchByEmbedding con el texto de entrada
