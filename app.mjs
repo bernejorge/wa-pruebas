@@ -29,6 +29,31 @@ app.use(
 //5493413500536 -> 543413500536
 app.use(envCheck);
 
+app.get('/health', (req, res) => {
+  const uptimeSeconds = process.uptime(); // Obtener los segundos totales
+
+  // Calcular días, horas, minutos y segundos
+  const days = Math.floor(uptimeSeconds / 86400); // 86400 segundos en un día
+  let remaining = uptimeSeconds % 86400;
+
+  const hours = Math.floor(remaining / 3600); // 3600 segundos en una hora
+  remaining %= 3600;
+
+  const minutes = Math.floor(remaining / 60); // 60 segundos en un minuto
+  const seconds = remaining % 60;
+
+  res.json({
+    status: 'ok',
+    uptime: {
+      days: days,
+      hours: hours,
+      minutes: minutes,
+      seconds: Number(seconds.toFixed(2)) // Mantener 2 decimales para los segundos
+    },
+    timestamp: Date.now()
+  });
+});
+
 app.get('/', async (req, res) => {
    res.json({
       message: "Bienvenido whatapp testing api v1.022 ..."

@@ -68,7 +68,8 @@ router.get("/turnoshp/obtener-centros-atencion", async (req, res) => {
   try {
     //TODO: llamar a => curl -X POST "http://innova.testing.hospitalprivado.com.ar/Comun/IntegracionMETA/api/CentrosDeAtencion/Obtener" -H "accept: text/plain" -H "From: tips" -H "Content-Type: application/json-patch+json" -d "{\"IdsCentrosDeAtencion\":[0],\"IdPersonaRelacion\":0}"
     const fromToken = "webhook"; // El token de acceso está en los headers
-    const apiUrl = `${process.env.API_BASE_URL}/api/CentrosDeAtencion/Obtener`;
+    ///api/Meta/ObtenerCentrosAtencion
+    const apiUrl = `${process.env.API_BASE_URL}/api/Meta/ObtenerCentrosAtencion`;
 
     const mockCentros = [
       { IdCentroAtencion: 14, nombre: "Central", domicilio: "Av. Naciones Unidas 346, Córdoba", telefono: "0351-4688200" },
@@ -76,7 +77,7 @@ router.get("/turnoshp/obtener-centros-atencion", async (req, res) => {
       { IdCentroAtencion: 16, nombre: "Hiper Libertad", domicilio: "Hiper Libertad Rodriguez del Busto - Fray Luis Beltrán y Cardeñosa, Poeta Lugones - Córdoba", telefono: "0351-4779500" },
       { IdCentroAtencion: 17, nombre: "Cerro", domicilio: "Luis de Tejeda 4625. Córdoba. CP 5000.", telefono: "0351-4118336" },
       { IdCentroAtencion: 18, nombre: "Villa Allende", domicilio: "Río de Janeiro 1725 (esq. Mendoza) - Villa Allende", telefono: "0351-5697610" },
-      { IdCentroAtencion: 19, nombre: "Hospital Raúl Ángel Ferreyra", domicilio: "Av. Pablo Ricchieri 2200, Córdoba", telefono: "0351-4476500" },
+      //{ IdCentroAtencion: 19, nombre: "Hospital Raúl Ángel Ferreyra", domicilio: "Av. Pablo Ricchieri 2200, Córdoba", telefono: "0351-4476500" },
       { IdCentroAtencion: 20, nombre: "Anexo Jardin", domicilio: "Av. Richieri 3176", telefono: "351-4865557" },
       { IdCentroAtencion: 21, nombre: "Centro Médico San Vicente", domicilio: "Sargento Cabral 1385. Córdoba", telefono: "0351-4558041" },
       { IdCentroAtencion: 22, nombre: "Cañada Honda", domicilio: "", telefono: "" },
@@ -89,16 +90,32 @@ router.get("/turnoshp/obtener-centros-atencion", async (req, res) => {
       { IdCentroAtencion: 29, nombre: "Hospital Privado Nuñez", domicilio: "Av. Rafael Nuñez 5229 - Córdoba", telefono: "" },
       { IdCentroAtencion: 30, nombre: "Ctro Perif. Recta Martinolli", domicilio: "Recta Martinolli", telefono: "" },
       { IdCentroAtencion: 31, nombre: "Ctro Perif. Jardín Espinosa", domicilio: "Jardín Espinosa", telefono: "" },
-      { IdCentroAtencion: 32, nombre: "HRF Anexo Centro", domicilio: "Santa Rosa 770, Córdoba", telefono: "351-5711020" },
+      //{ IdCentroAtencion: 32, nombre: "HRF Anexo Centro", domicilio: "Santa Rosa 770, Córdoba", telefono: "351-5711020" },
       { IdCentroAtencion: 33, nombre: "Ctro Perif. Finochietto", domicilio: "Enrique Finocchietto 460", telefono: "" },
       { IdCentroAtencion: 34, nombre: "Centro Rehabilitación SDE", domicilio: "Santiago del Estero 333, Córdoba", telefono: "351-5697640" },
       { IdCentroAtencion: 35, nombre: "Ctro Perif. SDE", domicilio: "Santiago del Estero 333, Córdoba", telefono: "" },
       { IdCentroAtencion: 36, nombre: "Cent Perif. Recta Martinolli", domicilio: "recta", telefono: "035153035565" }
     ];
 
+    const response = await axios.get(apiUrl, {
+      headers: { From: fromToken }, // Headers adicionales
+    });
+
+    const data = response.data;
+
+    const centrosFiltrados = data.CentrosDeAtenciones.map(centro => ({
+      IdCentroAtencion: centro.Id,
+      nombre: centro.Nombre,
+      telefono: centro.Telefono
+    })).filter(
+      centro => centro.IdCentroAtencion !== 32 && centro.IdCentroAtencion !== 19
+    );;
+    
+     
+
     res.json({
       exito: true,
-      Centros: mockCentros
+      Centros: centrosFiltrados
     });
 
   } catch (error) {
