@@ -5,7 +5,7 @@ import pLimit from 'p-limit';
 
 // Define la URL de destino
 //const url = 'http://172.29.230.74:3002/api/v1/prediction/fbf63207-a0d7-4387-9893-6e379a90c7d2';
-const url = 'http://172.29.238.51:3002/api/v1/prediction/fbf63207-a0d7-4387-9893-6e379a90c7d2';
+const url = 'http://172.29.238.51:3002/api/v1/prediction/1bac50f8-f4b0-435e-845a-04764ca9309c';
 //const url = 'http://172.29.238.51:3002/api/v1/prediction/7bdb3737-7ab7-4b97-8132-4398f40767f2';
 
 // Define los encabezados y el cuerpo de la solicitud
@@ -15,7 +15,7 @@ const headers = {
 
 
 // Número total de solicitudes y el límite de concurrencia
-const totalRequests = 200;
+const totalRequests = 150;
 const concurrencyLimit = 50;
 
 // Crear un limitador de concurrencia

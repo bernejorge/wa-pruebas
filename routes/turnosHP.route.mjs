@@ -162,6 +162,48 @@ router.get("/turnoshp/obtener-servicios-centros", async (req, res)=>{
    }
 });
 
+router.get("/turnoshp/ObtenerCentroPorServiciosPrestacion", async (req, res)=>{
+  try {
+     const IdPrestacion = req.query.IdPrestacion;
+     const IdServicio = req.query.IdServicio;
+     const fromToken = "webhook"; // El token de acceso está en los headers
+     ///api/Meta/ObtenerCentroPorServiciosPrestacion
+     const apiUrl = `${process.env.API_BASE_URL}/api/Meta/ObtenerCentroPorServiciosPrestacion`; //completar la url con la que haga el seba
+     
+     const response = await axios.get(apiUrl, {
+        params: { 
+          IdPrestacion: IdPrestacion,
+          IdServicio: IdServicio
+        }, // Parámetros enviados como parte de la URL
+        headers: { From: fromToken }, // Headers adicionales
+     });
+
+     const filteredCentros = response.data.ListaCentroAtencionServicio.filter(
+       item => item.IdCentroAtencion !== 32 && item.IdCentroAtencion !== 19
+     );
+     
+     response.data.ListaCentroAtencionServicio = filteredCentros;
+
+     res.json({
+      success: true,
+      data: response.data,
+    }); 
+
+  } catch (error) {
+     console.error("Error al llamar a la API externa /Meta/ObtenerCentroServicios:", error) //completar la url;
+
+   // Verifica si el error viene con una respuesta del backend
+   const errorMessage =
+     error.response && error.response.data
+       ? error.response.data
+       : { mensaje: "Error desconocido al llamar a la API externa." };
+
+   res.status(error.response ? error.response.status : 500).json(errorMessage);
+  }
+});
+
+
+
 router.post("/turnoshp/obtener-prestaciones", async (req, res) => {
   try {
     ///api/Meta/ObtenerPrestaciones
